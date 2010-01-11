@@ -1,0 +1,7 @@
+== 0.0.2 - 6-Aug-2009
+* License changed to Artistic 2.0.
+* Some gemspec updates, including adding win32-event as a dependency and
+  test-unit as a development dependency.
+
+== 0.0.1 - 28-Nov-2008
+* Initial release

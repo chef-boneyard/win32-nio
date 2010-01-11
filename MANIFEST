@@ -1,0 +1,9 @@
+* CHANGES
+* MANIFEST
+* Rakefile
+* README
+* win32-nio.gemspec
+* benchmarks/win32_nio_benchmarks.rb
+* lib/win32/nio.rb
+* test/test_win32_nio_read.rb
+* test/test_win32_nio_readlines.rb
