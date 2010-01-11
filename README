@@ -2,6 +2,9 @@
    Native IO for Windows. This class matches and extends the current Ruby
    IO class API, using native Windows functions underneath the hood.
 
+= Installation
+   gem install win32-nio
+
 = Synopsis
    require 'win32/nio'
    include Win32
