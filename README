@@ -3,71 +3,71 @@
    IO class API, using native Windows functions underneath the hood.
 
 = Installation
-   gem install win32-nio
+  gem install win32-nio
 
 = Synopsis
-   require 'win32/nio'
-   include Win32
+  require 'win32/nio'
+  include Win32
    
-   p NIO.read('some_file.text')
+  p NIO.read('some_file.text')
    
-   p NIO.readlines('some_file.txt')
+  p NIO.readlines('some_file.txt')
    
 = Proof of Concept
-   This code is ALPHA!
+  This code is ALPHA!
+  
+  This code is mostly a proof of concept to see how to implement Ruby's
+  IO functions in pure Windows functions. While it does offer a couple of
+  features over and above Ruby's IO interface, such as the ability to supply
+  an event or a block to the NIO.read method, it offers little practical
+  advantage at the moment.
    
-   This code is mostly a proof of concept to see how to implement Ruby's
-   IO functions in pure Windows functions. While it does offer a couple of
-   features over and above Ruby's IO interface, such as the ability to supply
-   an event or a block to the NIO.read method, it offers little practical
-   advantage at the moment.
-   
-   In addition, it is currently using pure Ruby (via win32-api), which means
-   it isn't optimized for speed.
+  In addition, it is currently using pure Ruby (via win32-api), which means
+  it isn't optimized for speed.
 
 = Benchmarks
 
-   Using my HP Windows XP Pro laptop, with a 1.66 core duo Pentium T5500 and
-   2gb of RAM, I saw these results, which were typical in repeated runs:
+  Using my HP Windows XP Pro laptop, with a 1.66 core duo Pentium T5500 and
+  2gb of RAM, I saw these results, which were typical in repeated runs:
                          
                           user     system      total        real
-   IO.read(small)         0.016000   0.047000   0.063000 (  0.063000)
-   NIO.read(small)        0.109000   0.000000   0.109000 (  0.109000)
-   IO.read(medium)        0.422000   0.094000   0.516000 (  0.532000)
-   NIO.read(medium)       0.937000   0.062000   0.999000 (  1.047000)
-   IO.read(large)         3.282000   1.063000   4.345000 (  4.468000)
-   NIO.read(large)        8.187000   1.062000   9.249000 (  9.454000)
-   IO.readlines(small)    0.156000   0.063000   0.219000 (  0.234000)
-   NIO.readlines(small)   0.141000   0.000000   0.141000 (  0.797000)
-   IO.readlines(medium)   2.984000   0.250000   3.234000 (  3.625000)
-   NIO.readlines(medium)  1.172000   0.062000   1.234000 (  3.406000)
-   IO.readlines(large)    18.625000   2.281000  20.906000 ( 21.532000)
-   NIO.readlines(large)   12.406000   0.563000  12.969000 (122.643000)
+  IO.read(small)         0.016000   0.047000   0.063000 (  0.063000)
+  NIO.read(small)        0.109000   0.000000   0.109000 (  0.109000)
+  IO.read(medium)        0.422000   0.094000   0.516000 (  0.532000)
+  NIO.read(medium)       0.937000   0.062000   0.999000 (  1.047000)
+  IO.read(large)         3.282000   1.063000   4.345000 (  4.468000)
+  NIO.read(large)        8.187000   1.062000   9.249000 (  9.454000)
+  IO.readlines(small)    0.156000   0.063000   0.219000 (  0.234000)
+  NIO.readlines(small)   0.141000   0.000000   0.141000 (  0.797000)
+  IO.readlines(medium)   2.984000   0.250000   3.234000 (  3.625000)
+  NIO.readlines(medium)  1.172000   0.062000   1.234000 (  3.406000)
+  IO.readlines(large)    18.625000   2.281000  20.906000 ( 21.532000)
+  NIO.readlines(large)   12.406000   0.563000  12.969000 (122.643000)
    
-   Note that, in most cases, the user and system time has decreased, but
-   the real time has increased.
+  Note that, in most cases, the user and system time has decreased, but
+  the real time has increased.
    
 = Known Bugs
-   None that I know of. Please log any other bug reports on the RubyForge
-   project page at http://www.rubyforge.net/projects/win32utils
+  None that I know of. Please log any other bug reports on the RubyForge
+  project page at http://www.rubyforge.net/projects/win32utils
 
 = Future Plans
-   The pure Ruby code is really only meant for prototyping. The eventual
-   plan is to convert the Ruby code to equivalent C code in order to improve
-   performance.
+  The pure Ruby code is really only meant for prototyping. The eventual
+  plan is to convert the Ruby code to equivalent C code in order to improve
+  performance.
 
 = License
-   Artistic 2.0
+  Artistic 2.0
     
 = Copyright
-   (C) 2008-2009 Daniel J. Berger, All Rights Reserved
+  (C) 2008-2010 Daniel J. Berger, All Rights Reserved
     
 = Warranty
-   This package is provided "as is" and without any express or
-   implied warranties, including, without limitation, the implied
-   warranties of merchantability and fitness for a particular purpose.
+  This package is provided "as is" and without any express or
+  implied warranties, including, without limitation, the implied
+  warranties of merchantability and fitness for a particular purpose.
 
 = Author(s)
-   Daniel Berger
-   Park Heesob
+  Daniel Berger
+  Park Heesob
    
