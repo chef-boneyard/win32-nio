@@ -12,7 +12,7 @@ namespace 'gem' do
   desc 'Create the win32-nio gem'
   task :create => [:clean] do
     spec = eval(IO.read('win32-nio.gemspec'))
-    Gem::Builder.new(spec)
+    Gem::Builder.new(spec).build
   end
 
   desc 'Install the win32-nio gem'
