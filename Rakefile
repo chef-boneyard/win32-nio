@@ -3,21 +3,31 @@ require 'rake/testtask'
 require 'rbconfig'
 include Config
 
-desc 'Install the win32-nio library (non-gem)'
-task :install do
-   sitelibdir = CONFIG['sitelibdir']
-   installdir = File.join(sitelibdir, 'win32')
-   file = 'lib\win32\nio.rb'
+namespace 'gem' do
+  desc 'Remove any .gem files from the project.'
+  task :clean do
+    Dir['*.gem'].each{ |f| File.delete(f) }
+  end
 
-   Dir.mkdir(installdir) unless File.exists?(installdir)
-   FileUtils.cp(file, installdir, :verbose => true)
+  desc 'Create the win32-nio gem'
+  task :create => [:clean] do
+    spec = eval(IO.read('win32-nio.gemspec'))
+    Gem::Builder.new(spec)
+  end
+
+  desc 'Install the win32-nio gem'
+  task :install => [:create] do
+    file = Dir['*.gem'].first
+    sh "gem install #{file}"
+  end
 end
 
 desc 'Run the benchmark suite'
 task :bench do
-   sh "ruby -Ilib benchmarks/win32_nio_benchmarks.rb"end
+  sh "ruby -Ilib benchmarks/win32_nio_benchmarks.rb"
+end
 
 Rake::TestTask.new do |t|
-   t.verbose = true
-   t.warning = true
+  t.verbose = true
+  t.warning = true
 end
