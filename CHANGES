@@ -1,3 +1,9 @@
+== 0.0.3 - 24-Apr-2010
+* Removed inline gem building from the gemspec. That's now handled by a
+  Rakefile task.
+* Rafactored the Rakefile, removed an old install task and added new
+  gem tasks.
+
 == 0.0.2 - 6-Aug-2009
 * License changed to Artistic 2.0.
 * Some gemspec updates, including adding win32-event as a dependency and
