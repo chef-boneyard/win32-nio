@@ -9,7 +9,6 @@ Gem::Specification.new do |spec|
   spec.homepage = 'http://www.rubyforge.org/projects/win32utils'
   spec.platform = Gem::Platform::RUBY
   spec.summary  = 'Native IO for MS Windows'
-  spec.has_rdoc = true
   spec.files    = Dir['**/*'].reject{ |f| f.include?('git') }
 
   spec.rubyforge_project = 'Win32Utils'
