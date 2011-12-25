@@ -11,7 +11,7 @@ class TC_Win32_NIO_Read < Test::Unit::TestCase
 
       @@file = 'read_test.txt'
       @@text = "The quick brown fox jumped over the lazy dog's back"
-      
+
       File.open(@@file, 'w'){ |fh|
          100.times{ |n|
             fh.puts @@text + ": #{n}"
@@ -23,9 +23,9 @@ class TC_Win32_NIO_Read < Test::Unit::TestCase
       @size  = File.size(@@file)
       @event = Win32::Event.new('test')
    end
-   
+
    def test_nio_version
-      assert_equal('0.0.2', Win32::NIO::VERSION)      
+      assert_equal('0.0.3', Win32::NIO::VERSION)
    end
 
    def test_nio_read_basic
@@ -49,7 +49,7 @@ class TC_Win32_NIO_Read < Test::Unit::TestCase
       assert_equal('quick brown fox', NIO.read(@@file, 15, 4))
       assert_equal("lazy dog's back: 99\r\n", NIO.read(@@file, nil, @size-21))
    end
-   
+
    def test_nio_read_with_event
       assert_false(@event.signaled?)
       assert_nothing_raised{ NIO.read(@@file, 9, 0, @event) }
@@ -64,16 +64,16 @@ class TC_Win32_NIO_Read < Test::Unit::TestCase
       assert_raise(TypeError){ NIO.read(@@file, 1, 'foo') }
       assert_raise(TypeError){ NIO.read(@@file, 1, 1, 'foo') }
    end
-   
+
    def test_readlines_basic
       assert_respond_to(NIO, :readlines)
       assert_nothing_raised{ NIO.readlines(@@file) }
-      assert_kind_of(Array, NIO.readlines(@@file))   
+      assert_kind_of(Array, NIO.readlines(@@file))
    end
-   
+
    def test_readlines
       assert_equal("#{@@text}: 0", NIO.readlines(@@file).first)
-      assert_equal("#{@@text}: 99", NIO.readlines(@@file).last)    
+      assert_equal("#{@@text}: 99", NIO.readlines(@@file).last)
    end
 
    def teardown

@@ -12,7 +12,7 @@ require 'win32/event'
 
 # The Win32 module serves as a namespace only.
 module Win32
-   
+
   # The NIO class encapsulates the native IO methods for MS Windows.
   class NIO
     include Windows::File
@@ -22,7 +22,7 @@ module Win32
     include Windows::MSVCRT::IO
     include Windows::MSVCRT::Buffer
     include Windows::SystemInfo
-    include Windows::Memory      
+    include Windows::Memory
     include Windows::NIO
     include Windows::Thread
 
@@ -33,12 +33,12 @@ module Win32
     extend Windows::MSVCRT::IO
     extend Windows::MSVCRT::Buffer
     extend Windows::SystemInfo
-    extend Windows::Memory      
+    extend Windows::Memory
     extend Windows::NIO
     extend Windows::Thread
-      
+
     # The version of the win32-nio library
-    VERSION = '0.0.2'
+    VERSION = '0.0.3'
 
     # Error typically raised if any of the native functions fail.
     class Error < StandardError; end
@@ -48,7 +48,7 @@ module Win32
     # argument for the fourth argument, which must be an instance of
     # Win32::Event (if provided). The event is automatically set to a
     # signaled state when the read operation completes.
-    #   
+    #
     # If a block is provided, then it is treated as a callback that fires
     # when the read operation is complete.
     #
@@ -86,7 +86,7 @@ module Win32
         raise TypeError unless event.is_a?(Win32::Event)
       end
 
-      flags = FILE_FLAG_SEQUENTIAL_SCAN 
+      flags = FILE_FLAG_SEQUENTIAL_SCAN
 
       overlapped = 0.chr * 20  # sizeof(OVERLAPPED)
       overlapped[8,4] = [offset].pack('L') # OVERLAPPED.Offset
@@ -109,7 +109,7 @@ module Win32
       if handle == INVALID_HANDLE_VALUE
         raise Error, get_last_error
       end
-         
+
       # Ruby's File.size is broken, so we implement it here. Also, if an
       # offset is provided, we can reduce the size to only what we need.
       if length.nil?
@@ -129,11 +129,11 @@ module Win32
           bytes = [0].pack('L')
           bool = ReadFile(handle, buf, length, bytes, overlapped)
         end
-            
+
         errno = GetLastError()
 
         SleepEx(1, true) # Must be in alertable wait state
-         
+
         unless bool
           if errno = ERROR_IO_PENDING
             unless GetOverlappedResult(handle, overlapped, bytes, true)
@@ -143,12 +143,12 @@ module Win32
             raise Error, errno
           end
         end
-            
+
         event.wait if event
       ensure
         CloseHandle(handle)
       end
-         
+
       buf[0, length]
     end
 
@@ -168,11 +168,11 @@ module Win32
         FILE_FLAG_OVERLAPPED | FILE_FLAG_NO_BUFFERING,
         nil
       )
-         
+
       if handle == INVALID_HANDLE_VALUE
         raise Error, get_last_error
       end
-         
+
       sysbuf = 0.chr * 40
       GetSystemInfo(sysbuf)
 
@@ -182,7 +182,7 @@ module Win32
 
       page_size = sysbuf[4,4].unpack('L')[0] # dwPageSize
       page_num  = (file_size.to_f / page_size).ceil
-         
+
       begin
         base_address = VirtualAlloc(
           nil,
@@ -190,20 +190,20 @@ module Win32
           MEM_COMMIT,
           PAGE_READWRITE
         )
-               
+
         buf_list = []
-            
+
         for i in 0...page_num
           buf_list.push(base_address + page_size * i)
         end
-                  
+
         seg_array  = buf_list.pack('Q*') + 0.chr * 8
         overlapped = 0.chr * 20
-                  
+
         bool = ReadFileScatter(
           handle,
           seg_array,
-          page_size * page_num, 
+          page_size * page_num,
           nil,
           overlapped
         )
