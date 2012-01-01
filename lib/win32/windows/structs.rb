@@ -14,5 +14,22 @@ module Windows
         :hEvent, :ulong
       )
     end
+
+    # dwOemId is deprecated. Just assume the nested struct.
+    class SystemInfo < FFI::Struct
+      layout(
+        :wProcessorArchitecture, :ushort,
+        :wReserved, :ushort,
+        :dwPageSize, :ulong,
+        :lpMinimumApplicationAddress, :pointer,
+        :lpMaximumApplicationAddress, :pointer,
+        :dwActiveProcessorMask, :pointer,
+        :dwNumberOfProcessors, :ulong,
+        :dwProcessorType, :ulong,
+        :dwAllocationGranularity, :ulong,
+        :wProcessorLevel, :ushort,
+        :wProcessorRevision, :ushort
+      )
+    end
   end
 end
