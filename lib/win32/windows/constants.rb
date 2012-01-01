@@ -65,5 +65,8 @@ module Windows
     STATUS_USER_APC         =  192    
     STATUS_TIMEOUT          =  258    
     STATUS_PENDING          =  259
+
+    ERROR_IO_INCOMPLETE     = 996
+    ERROR_IO_PENDING        = 997
   end
 end
