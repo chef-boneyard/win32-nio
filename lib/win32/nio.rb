@@ -102,16 +102,23 @@ module Win32
             raise Error, get_last_error
           end
 
-          buf_list = []
+          array = []
 
           for i in 0...page_num
-            buf_list.push(base_address + page_size * i)
+            segment = FileSegmentElement.new
+            segment[:Alignment] = base_address + page_size * i
+            array << segment
           end
 
-          seg_array  = buf_list.pack('Q*') + 0.chr * 8
+          segment_array = FFI::MemoryPointer.new(:pointer, array.length)
+
+          array.each_with_index do |p,i|
+            segment_array[i].put_pointer(0, p)
+          end
+
           overlapped = Overlapped.new
 
-          bool = ReadFileScatter(handle, seg_array, size, nil, overlapped)
+          bool = ReadFileScatter(handle, segment_array, size, nil, overlapped)
 
           unless bool > 0
             error = GetLastError()
