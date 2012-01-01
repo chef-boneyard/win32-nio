@@ -31,5 +31,9 @@ module Windows
         :wProcessorRevision, :ushort
       )
     end
+
+    class FileSegmentElement < FFI::Union
+      layout(:Buffer, :pointer, :Alignment, :ulong)
+    end
   end
 end
