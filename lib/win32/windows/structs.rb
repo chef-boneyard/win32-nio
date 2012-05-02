@@ -4,13 +4,13 @@ module Windows
   module Structs
     extend FFI::Library
 
+    # I'm assuming the anonymous struct for the internal union here.
     class Overlapped < FFI::Struct
       layout(
         :Internal, :pointer,
         :InternalHigh, :pointer,
         :Offset, :ulong,
         :OffsetHigh, :ulong,
-        :Vpointer, :pointer,
         :hEvent, :ulong
       )
     end
