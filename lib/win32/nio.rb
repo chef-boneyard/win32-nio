@@ -135,10 +135,11 @@ module Win32
           buffer = 0.chr * file_size
           memcpy(buffer, buf_list[0], file_size)
           buffer.split("\r\n")
+        ensure
+          VirtualFree(base_address, 0, MEM_RELEASE)
         end
       ensure
         CloseHandle(handle) if handle && handle != INVALID_HANDLE_VALUE
-        VirtualFree(base_address, 0, MEM_RELEASE)
       end
     end # NIO.readlines
 
