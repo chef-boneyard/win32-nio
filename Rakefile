@@ -1,14 +1,10 @@
 require 'rake'
+require 'rake/clean'
 require 'rake/testtask'
-require 'rbconfig'
-include Config
+
+CLEAN.include("**/*.gem", "**/*.txt")
 
 namespace 'gem' do
-  desc 'Remove any .gem files from the project.'
-  task :clean do
-    Dir['*.gem'].each{ |f| File.delete(f) }
-  end
-
   desc 'Create the win32-nio gem'
   task :create => [:clean] do
     spec = eval(IO.read('win32-nio.gemspec'))
