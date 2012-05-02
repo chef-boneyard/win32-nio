@@ -72,9 +72,12 @@ module Win32
     end # NIO.read
 
     def self.readlines(file, sep = "\r\n")
+      fname = file + "\0"
+      fname.encode!('UTF-16LE')
+
       begin
-        handle = CreateFileA(
-          file,
+        handle = CreateFileW(
+          fname,
           GENERIC_READ,
           FILE_SHARE_READ,
           nil,
@@ -84,7 +87,7 @@ module Win32
         )
 
         if handle == INVALID_HANDLE_VALUE
-          raise Error, get_last_error
+          raise SystemCallError, GetLastError(), "CreateFileW"
         end
 
         sysinfo = SystemInfo.new
@@ -99,7 +102,7 @@ module Win32
           base_address = VirtualAlloc(nil, size, MEM_COMMIT, PAGE_READWRITE)
 
           if base_address == 0
-            raise Error, get_last_error
+            raise SystemCallError, GetLastError(), "VirtualAlloc"
           end
 
           array = []
@@ -123,7 +126,7 @@ module Win32
           unless bool > 0
             error = GetLastError()
             if error != ERROR_IO_PENDING
-              raise Error, get_last_error(error)
+              raise SystemCallError, error, "ReadFileScatter"
             end
           end
 
