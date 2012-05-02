@@ -18,9 +18,6 @@ module Win32
     # The version of the win32-nio library
     VERSION = '0.1.0'
 
-    # Error typically raised if any of the native functions fail.
-    class Error < StandardError; end
-
     # This method is similar to Ruby's IO.read method except that it uses
     # native function calls.
     #
@@ -37,8 +34,11 @@ module Win32
     #
     def self.read(name, length=nil, offset=0)
       begin
-        handle = CreateFileA(
-          name,
+        fname = name + "\0"
+        fname.encode!('UTF-16LE')
+
+        handle = CreateFileW(
+          fname,
           GENERIC_READ,
           FILE_SHARE_READ,
           nil,
@@ -48,24 +48,24 @@ module Win32
         )
 
         if handle == INVALID_HANDLE_VALUE
-          raise "CreateFile failed: " + get_last_error
+          raise SystemCallError, GetLastError(), "CreateFile"
         end
 
         length ||= File.size(name)
 
         olap  = Overlapped.new
-        ptr   = FFI::MemoryPointer.new(:char, length)
+        buf   = 0.chr * length
         bytes = FFI::MemoryPointer.new(:ulong)
 
         olap[:Offset] = offset
 
-        bool = ReadFile(handle, ptr, length, bytes, olap)
+        bool = ReadFile(handle, buf, buf.size, bytes, olap)
 
         unless bool
-          raise "ReadFile failed: " + get_last_error 
+          raise SystemCallError, GetLastError(), "ReadFile"
         end
 
-        ptr.read_string(length)[/^[^\0]*/]
+        buf.strip
       ensure
         CloseHandle(handle) if handle && handle != INVALID_HANDLE_VALUE
       end
@@ -93,7 +93,7 @@ module Win32
         file_size = File.size(file)
         page_size = sysinfo[:dwPageSize]
         page_num  = (file_size.to_f / page_size).ceil
-        
+
         begin
           size = page_size * page_num
           base_address = VirtualAlloc(nil, size, MEM_COMMIT, PAGE_READWRITE)
@@ -141,5 +141,3 @@ module Win32
 
   end # NIO
 end # Win32
-
-Win32::NIO.readlines('test.txt')
