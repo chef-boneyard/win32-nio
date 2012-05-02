@@ -113,10 +113,13 @@ module Win32
             array << segment
           end
 
-          segment_array = FFI::MemoryPointer.new(FileSegmentElement, array.length)
+          # Add an extra element for null
+          array << FileSegmentElement.new
 
-          array.each_with_index do |p,i|
-            segment_array[i].put_pointer(0, p)
+          segment_array = FFI::MemoryPointer.new(:pointer, array.length)
+
+          array.each_with_index do |ptr, i|
+            segment_array[i].put_pointer(0, ptr)
           end
 
           overlapped = Overlapped.new
@@ -133,7 +136,7 @@ module Win32
           SleepEx(1, 1) unless HasOverlappedIoCompleted(overlapped)
 
           buffer = 0.chr * file_size
-          memcpy(buffer, buf_list[0], file_size)
+          memcpy(buffer, segment_array[0], file_size)
           buffer.split("\r\n")
         ensure
           VirtualFree(base_address, 0, MEM_RELEASE)
