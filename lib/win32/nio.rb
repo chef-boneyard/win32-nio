@@ -32,7 +32,7 @@ module Win32
     # # Read 50 bytes starting at offset 10
     # Win32::NIO.read(file, 50, 10)
     #
-    def self.read(name, length=nil, offset=0)
+    def self.read(name, length=nil, offset=0, *options)
       begin
         fname = name + "\0"
         fname.encode!('UTF-16LE')
@@ -65,7 +65,7 @@ module Win32
           raise SystemCallError, GetLastError(), "ReadFile"
         end
 
-        buf.strip
+        buf.strip.sub("\r\n", $/)
       ensure
         CloseHandle(handle) if handle && handle != INVALID_HANDLE_VALUE
       end
