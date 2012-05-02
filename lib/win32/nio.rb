@@ -113,7 +113,7 @@ module Win32
             array << segment
           end
 
-          segment_array = FFI::MemoryPointer.new(:pointer, array.length)
+          segment_array = FFI::MemoryPointer.new(FileSegmentElement, array.length)
 
           array.each_with_index do |p,i|
             segment_array[i].put_pointer(0, p)
@@ -123,7 +123,7 @@ module Win32
 
           bool = ReadFileScatter(handle, segment_array, size, nil, overlapped)
 
-          unless bool > 0
+          unless bool
             error = GetLastError()
             if error != ERROR_IO_PENDING
               raise SystemCallError, error, "ReadFileScatter"
