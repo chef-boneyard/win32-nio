@@ -32,7 +32,16 @@ module Win32
     # # Read 50 bytes starting at offset 10
     # Win32::NIO.read(file, 50, 10)
     #
-    def self.read(name, length=nil, offset=0, *options)
+    # Note that the +options+ that may be passed to this method are limited
+    # to encoding: and mode: because we're no longer using the open function
+    # internally. In the case of mode: the only thing that is checked for is
+    # the presence of the 'b' (binary) mode.
+    #--
+    # In practice the fact that I ignore open_args: is irrelevant since you
+    # would never want to open in anything other than GENERIC_READ. I suppose
+    # I could change this to as a way to pass flags to CreateFile.
+    #
+    def self.read(name, length=nil, offset=0, options=nil)
       begin
         fname = name + "\0"
         fname.encode!('UTF-16LE')
@@ -65,7 +74,12 @@ module Win32
           raise SystemCallError, GetLastError(), "ReadFile"
         end
 
-        buf.strip.sub("\r\n", $/)
+        result = buf.strip
+
+        result.encode!(options[:encoding]) if options[:encoding]
+        result.gsub!("\r\n", $/) unless options[:mode] && options[:mode].include?('b')
+
+        result
       ensure
         CloseHandle(handle) if handle && handle != INVALID_HANDLE_VALUE
       end
