@@ -41,7 +41,7 @@ module Win32
     # would never want to open in anything other than GENERIC_READ. I suppose
     # I could change this to as a way to pass flags to CreateFile.
     #
-    def self.read(name, length=nil, offset=0, options=nil)
+    def self.read(name, length=nil, offset=0, options={})
       begin
         fname = name + "\0"
         fname.encode!('UTF-16LE')
@@ -77,7 +77,7 @@ module Win32
         result = buf.strip
 
         result.encode!(options[:encoding]) if options[:encoding]
-        result.gsub!("\r\n", $/) unless options[:mode] && options[:mode].include?('b')
+        result.gsub!(/\\r\\n/, $/) unless options[:mode] && options[:mode].include?('b')
 
         result
       ensure
