@@ -77,7 +77,7 @@ module Win32
         result = buf.strip
 
         result.encode!(options[:encoding]) if options[:encoding]
-        result.gsub!(/\\r\\n/, $/) unless options[:mode] && options[:mode].include?('b')
+        result.gsub!(/\r\n/, $/) unless options[:mode] && options[:mode].include?('b')
 
         result
       ensure
