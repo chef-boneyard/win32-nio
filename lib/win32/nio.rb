@@ -77,7 +77,7 @@ module Win32
         result = buf.strip
 
         result.encode!(options[:encoding]) if options[:encoding]
-        result.gsub!(/\r\n/, $/) unless options[:mode] && options[:mode].include?('b')
+        result.gsub!(/\r\n/, $/) if options[:mode] && options[:mode].include?('t')
 
         result
       ensure
@@ -101,7 +101,7 @@ module Win32
         )
 
         if handle == INVALID_HANDLE_VALUE
-          raise SystemCallError, GetLastError(), "CreateFileW"
+          raise SystemCallError, FFI.errno, "CreateFileW"
         end
 
         sysinfo = SystemInfo.new
@@ -116,7 +116,7 @@ module Win32
           base_address = VirtualAlloc(nil, size, MEM_COMMIT, PAGE_READWRITE)
 
           if base_address == 0
-            raise SystemCallError, GetLastError(), "VirtualAlloc"
+            raise SystemCallError, FFI.errno, "VirtualAlloc"
           end
 
           array = []
