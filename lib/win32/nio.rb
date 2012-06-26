@@ -147,7 +147,7 @@ module Win32
             end
           end
 
-          SleepEx(1, 1) unless HasOverlappedIoCompleted(overlapped)
+          SleepEx(1, true) unless HasOverlappedIoCompleted(overlapped)
 
           buffer = 0.chr * file_size
           memcpy(buffer, segment_array[0], file_size)

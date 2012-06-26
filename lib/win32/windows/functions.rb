@@ -12,7 +12,7 @@ module Windows
     attach_function :GetSystemInfo, [:pointer], :void
     attach_function :ReadFile, [:ulong, :buffer_out, :ulong, :pointer, :pointer], :bool
     attach_function :ReadFileScatter, [:ulong, :pointer, :ulong, :pointer, :pointer], :bool
-    attach_function :SleepEx, [:ulong, :int], :ulong
+    attach_function :SleepEx, [:ulong, :bool], :ulong
     attach_function :VirtualAlloc, [:pointer, :size_t, :ulong, :ulong], :ulong
     attach_function :VirtualFree, [:ulong, :size_t, :ulong], :bool
 
