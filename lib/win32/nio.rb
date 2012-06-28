@@ -57,7 +57,7 @@ module Win32
         )
 
         if handle == INVALID_HANDLE_VALUE
-          raise SystemCallError, GetLastError(), "CreateFile"
+          raise SystemCallError, FFI.errno, "CreateFile"
         end
 
         length ||= File.size(name)
@@ -71,7 +71,7 @@ module Win32
         bool = ReadFile(handle, buf, buf.size, bytes, olap)
 
         unless bool
-          raise SystemCallError, GetLastError(), "ReadFile"
+          raise SystemCallError, FFI.errno, "ReadFile"
         end
 
         result = buf.strip
@@ -141,7 +141,7 @@ module Win32
           bool = ReadFileScatter(handle, segment_array, size, nil, overlapped)
 
           unless bool
-            error = GetLastError()
+            error = FFI.errno
             if error != ERROR_IO_PENDING
               raise SystemCallError, error, "ReadFileScatter"
             end
