@@ -130,7 +130,7 @@ module Win32
           # Add an extra element for null
           array << FileSegmentElement.new
 
-          segment_array = FFI::MemoryPointer.new(:pointer, array.length)
+          segment_array = FFI::MemoryPointer.new(FileSegmentElement, array.length)
 
           array.each_with_index do |ptr, i|
             segment_array[i].put_pointer(0, ptr)
@@ -151,7 +151,7 @@ module Win32
 
           buffer = 0.chr * file_size
           memcpy(buffer, segment_array[0], file_size)
-          buffer.split("\r\n")
+          buffer.split(sep)
         ensure
           VirtualFree(base_address, 0, MEM_RELEASE)
         end
