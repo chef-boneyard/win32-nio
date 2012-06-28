@@ -8,7 +8,6 @@ module Windows
     attach_function :CloseHandle, [:long], :bool
     attach_function :CreateFileA, [:string, :ulong, :ulong, :pointer, :ulong, :ulong, :ulong], :ulong
     attach_function :CreateFileW, [:buffer_in, :ulong, :ulong, :pointer, :ulong, :ulong, :ulong], :ulong
-    attach_function :GetLastError, [], :ulong
     attach_function :GetSystemInfo, [:pointer], :void
     attach_function :ReadFile, [:ulong, :buffer_out, :ulong, :pointer, :pointer], :bool
     attach_function :ReadFileScatter, [:ulong, :pointer, :ulong, :pointer, :pointer], :bool
