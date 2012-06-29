@@ -14,9 +14,5 @@ module Windows
     attach_function :SleepEx, [:ulong, :bool], :ulong
     attach_function :VirtualAlloc, [:pointer, :size_t, :ulong, :ulong], :ulong
     attach_function :VirtualFree, [:ulong, :size_t, :ulong], :bool
-
-    ffi_lib :msvcrt
-
-    attach_function :memcpy, [:pointer, :pointer, :size_t], :pointer
   end
 end
