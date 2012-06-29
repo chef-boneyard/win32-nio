@@ -33,7 +33,7 @@ module Windows
     end
 
     class FileSegmentElement < FFI::Union
-      layout(:Buffer, :pointer, :Alignment, :double)
+      layout(:Buffer, :pointer, :Alignment, :uint64)
     end
   end
 end
