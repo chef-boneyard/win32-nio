@@ -127,14 +127,11 @@ module Win32
             array << segment
           end
 
-          # Add an extra element for null
+          # Add an extra element for null as per the docs
           array << FileSegmentElement.new
 
-          segment_array = FFI::MemoryPointer.new(FileSegmentElement, array.length)
-
-          array.each_with_index do |ptr, i|
-            segment_array[i].put_pointer(0, ptr)
-          end
+          segment_array = FFI::MemoryPointer.new(FileSegmentElement, array.size)
+          segment_array.put_array_of_pointer(0, array)
 
           overlapped = Overlapped.new
 
