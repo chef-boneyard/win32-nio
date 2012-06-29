@@ -119,23 +119,16 @@ module Win32
             raise SystemCallError, FFI.errno, "VirtualAlloc"
           end
 
-          array = []
+          # Add 1 for null as per the docs
+          array = FFI::MemoryPointer.new(FileSegmentElement, page_num + 1)
 
           for i in 0...page_num
-            segment = FileSegmentElement.new
-            segment[:Alignment] = base_address + page_size * i
-            array << segment
+            FileSegmentElement.new(array[i])[:Alignment] = base_address + page_size * i
           end
-
-          # Add an extra element for null as per the docs
-          array << FileSegmentElement.new
-
-          segment_array = FFI::MemoryPointer.new(FileSegmentElement, array.size)
-          segment_array.put_array_of_pointer(0, array)
 
           overlapped = Overlapped.new
 
-          bool = ReadFileScatter(handle, segment_array, size, nil, overlapped)
+          bool = ReadFileScatter(handle, array, size, nil, overlapped)
 
           unless bool
             error = FFI.errno
@@ -147,7 +140,7 @@ module Win32
           SleepEx(1, true) unless HasOverlappedIoCompleted(overlapped)
 
           buffer = 0.chr * file_size
-          memcpy(buffer, segment_array[0], file_size)
+          memcpy(buffer, array[0], file_size)
           buffer.split(sep)
         ensure
           VirtualFree(base_address, 0, MEM_RELEASE)
