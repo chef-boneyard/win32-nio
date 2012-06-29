@@ -132,16 +132,14 @@ module Win32
 
           unless bool
             error = FFI.errno
-            if error != ERROR_IO_PENDING
+            if error == ERROR_IO_PENDING
+              SleepEx(1, true) unless HasOverlappedIoCompleted(overlapped) # TODO: Broke
+            else
               raise SystemCallError, error, "ReadFileScatter"
             end
           end
 
-          SleepEx(1, true) unless HasOverlappedIoCompleted(overlapped)
-
-          buffer = 0.chr * file_size
-          memcpy(buffer, array[0], file_size)
-          buffer.split(sep)
+          array[0].read_pointer.read_string.split(sep)
         ensure
           VirtualFree(base_address, 0, MEM_RELEASE)
         end
