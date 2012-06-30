@@ -7,8 +7,8 @@ module Windows
     # I'm assuming the anonymous struct for the internal union here.
     class Overlapped < FFI::Struct
       layout(
-        :Internal, :pointer,
-        :InternalHigh, :pointer,
+        :Internal, :ulong,
+        :InternalHigh, :ulong,
         :Offset, :ulong,
         :OffsetHigh, :ulong,
         :hEvent, :ulong
