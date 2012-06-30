@@ -23,9 +23,24 @@ task :bench do
   sh "ruby -Ilib benchmarks/win32_nio_benchmarks.rb"
 end
 
-Rake::TestTask.new do |t|
-  t.verbose = true
-  t.warning = true
+namespace :test do
+  Rake::TestTask.new(:read) do |t|
+    t.verbose = true
+    t.warning = true
+    t.test_files = FileList['test/test_win32_nio_read.rb']
+  end
+
+  Rake::TestTask.new(:readlines) do |t|
+    t.verbose = true
+    t.warning = true
+    t.test_files = FileList['test/test_win32_nio_readlines.rb']
+  end
+
+  Rake::TestTask.new(:all) do |t|
+    t.verbose = true
+    t.warning = true
+    t.test_files = FileList['test/test*.rb']
+  end
 end
 
-task :default => :test
+task :default => 'test:all'
