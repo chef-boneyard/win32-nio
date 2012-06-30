@@ -123,7 +123,8 @@ module Win32
           array = FFI::MemoryPointer.new(FileSegmentElement, page_num + 1)
 
           for i in 0...page_num
-            FileSegmentElement.new(array[i])[:Alignment] = base_address + page_size * i
+            fse = FileSegmentElement.new(array[i])
+            fse[:Alignment] = base_address + page_size * i
           end
 
           overlapped = Overlapped.new
@@ -133,13 +134,12 @@ module Win32
           unless bool
             error = FFI.errno
             if error == ERROR_IO_PENDING
-              SleepEx(1, true) unless HasOverlappedIoCompleted(overlapped)
+              SleepEx(1, true) while !HasOverlappedIoCompleted(overlapped)
             else
               raise SystemCallError, error, "ReadFileScatter"
             end
           end
 
-          # TODO: This is wrong, only reads first element, if at all.
           array[0].read_pointer.read_string.split(sep)
         ensure
           VirtualFree(base_address, 0, MEM_RELEASE)
