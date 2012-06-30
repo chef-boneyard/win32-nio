@@ -74,10 +74,13 @@ module Win32
           raise SystemCallError, FFI.errno, "ReadFile"
         end
 
-        result = buf[/^[^\0]*/]
+        result = buf.delete(0.chr)
 
         result.encode!(options[:encoding]) if options[:encoding]
-        result.gsub!(/\r\n/, $/) if options[:mode] && options[:mode].include?('t')
+
+        if options[:mode] && options[:mode].include?('t') && ($/ != "\r\n")
+          result.gsub!(/\r\n/, $/)
+        end
 
         result
       ensure
