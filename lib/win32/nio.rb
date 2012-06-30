@@ -143,7 +143,16 @@ module Win32
             end
           end
 
-          array[0].read_pointer.read_string.split(sep)
+          string = array[0].read_pointer.read_string
+
+          if sep == ""
+            array = string.split(/(\r\n){2,}/)
+            array.delete("\r\n")
+          else
+            array = string.split(sep)
+          end
+
+          array
         ensure
           VirtualFree(base_address, 0, MEM_RELEASE)
         end
