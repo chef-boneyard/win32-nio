@@ -1,4 +1,5 @@
 require 'ffi'
+require 'win32/event'
 
 require File.join(File.dirname(__FILE__), 'windows/functions')
 require File.join(File.dirname(__FILE__), 'windows/constants')
@@ -33,9 +34,11 @@ module Win32
     # Win32::NIO.read(file, 50, 10)
     #
     # Note that the +options+ that may be passed to this method are limited
-    # to encoding: and mode: because we're no longer using the open function
-    # internally. In the case of mode: the only thing that is checked for is
-    # the presence of the 'b' (binary) mode.
+    # to :encoding, :mode and :event because we're no longer using the open
+    # function internally. In the case of :mode the only thing that is checked
+    # for is the presence of the 'b' (binary) mode.
+    #
+    # The :event option, if present, must be a Win32::Event object.
     #--
     # In practice the fact that I ignore open_args: is irrelevant since you
     # would never want to open in anything other than GENERIC_READ. I suppose
@@ -46,13 +49,28 @@ module Win32
         fname = name + "\0"
         fname.encode!('UTF-16LE')
 
+        flags = FILE_FLAG_SEQUENTIAL_SCAN
+        olap  = Overlapped.new
+        event = options[:event]
+
+        if event
+          raise TypeError unless event.is_a?(Win32::Event)
+        end
+
+        olap[:Offset] = offset
+
+        if offset > 0 || event
+          flags |= FILE_FLAG_OVERLAPPED
+          olap[:hEvent] = event.handle if event
+        end
+
         handle = CreateFileW(
           fname,
           GENERIC_READ,
           FILE_SHARE_READ,
           nil,
           OPEN_EXISTING,
-          FILE_FLAG_SEQUENTIAL_SCAN,
+          flags,
           0
         )
 
@@ -61,17 +79,21 @@ module Win32
         end
 
         length ||= File.size(name)
+        buf  = 0.chr * length
 
-        olap  = Overlapped.new
-        buf   = 0.chr * length
-        bytes = FFI::MemoryPointer.new(:ulong)
+        bool = ReadFile(handle, buf, buf.size, nil, olap)
 
-        olap[:Offset] = offset
-
-        bool = ReadFile(handle, buf, buf.size, bytes, olap)
+        SleepEx(1, true) # Must be in alertable wait state
 
         unless bool
-          raise SystemCallError, FFI.errno, "ReadFile"
+          if FFI.errno == ERROR_IO_PENDING
+            bytes = FFI::MemoryPointer.new(:ulong)
+            unless GetOverlappedResult(handle, olap, bytes, true)
+              raise SystemCallError, FFI.errno, "GetOverlappedResult"
+            end
+          else
+            raise SystemCallError, FFI.errno, "ReadFile"
+          end
         end
 
         result = buf.delete(0.chr)
