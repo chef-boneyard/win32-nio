@@ -81,7 +81,12 @@ module Win32
         length ||= File.size(name)
         buf  = 0.chr * length
 
-        bool = ReadFile(handle, buf, buf.size, nil, olap)
+        if block_given?
+          callback = Proc.new{ |e,b,o| block.call }
+          bool = ReadFileEx(handle, buf, buf.size, olap, callback)
+        else
+          bool = ReadFile(handle, buf, buf.size, nil, olap)
+        end
 
         SleepEx(1, true) # Must be in alertable wait state
 
