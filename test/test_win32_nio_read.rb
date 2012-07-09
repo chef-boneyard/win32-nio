@@ -62,7 +62,7 @@ class TC_Win32_NIO_Read < Test::Unit::TestCase
   end
 
   test "offset parameter must be a positive number" do
-    assert_raise(ArgumentError){ NIO.read(@@file, 1, -1) }
+    assert_raise(Errno::EINVAL, Errno::ENAMETOOLONG){ NIO.read(@@file, 1, -1) }
     assert_raise(TypeError){ NIO.read(@@file, 1, 'foo') }
   end
 

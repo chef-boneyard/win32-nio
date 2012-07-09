@@ -1,3 +1,7 @@
+== 0.1.0 - 12-Jul-2012
+* Changed from win32-api to FFI.
+* Now requires Ruby 1.9 or later.
+
 == 0.0.3 - 24-Apr-2010
 * Removed inline gem building from the gemspec. That's now handled by a
   Rakefile task.
