@@ -1,6 +1,6 @@
 = Description
-   Native IO for Windows. This class matches and extends the current Ruby
-   IO class API, using native Windows functions underneath the hood.
+  Native IO for Windows. This class matches and extends the current Ruby
+  IO class API, using native Windows functions underneath the hood.
 
 = Installation
   gem install win32-nio
@@ -22,7 +22,7 @@
   an event or a block to the NIO.read method, it offers little practical
   advantage at the moment.
    
-  In addition, it is currently using pure Ruby (via win32-api), which means
+  In addition, it is currently using pure Ruby (via FFI), which means
   it isn't optimized for speed.
 
 = Benchmarks
@@ -60,7 +60,7 @@
   Artistic 2.0
     
 = Copyright
-  (C) 2008-2010 Daniel J. Berger, All Rights Reserved
+  (C) 2008-2012 Daniel J. Berger, All Rights Reserved
     
 = Warranty
   This package is provided "as is" and without any express or
@@ -70,4 +70,3 @@
 = Author(s)
   Daniel Berger
   Park Heesob
-   
