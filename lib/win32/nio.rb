@@ -115,6 +115,12 @@ module Win32
       end
     end # NIO.read
 
+    # Reads the entire file specified by portname as individual lines, and
+    # returns those lines in an array. Lines are separated by +sep+.
+    #--
+    # The semantics are the same as the MRI version but the implementation
+    # is drastically different. We use a scattered IO read.
+    #
     def self.readlines(file, sep = "\r\n")
       fname = file + "\0"
       fname.encode!('UTF-16LE')
