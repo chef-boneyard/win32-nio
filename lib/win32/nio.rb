@@ -75,7 +75,7 @@ module Win32
         )
 
         if handle == INVALID_HANDLE_VALUE
-          raise SystemCallError, FFI.errno, "CreateFile"
+          raise SystemCallError.new("CreateFile", FFI.errno)
         end
 
         length ||= File.size(name)
@@ -88,16 +88,18 @@ module Win32
           bool = ReadFile(handle, buf, buf.size, nil, olap)
         end
 
+        errno = FFI.errno
+
         SleepEx(1, true) # Must be in alertable wait state
 
         unless bool
-          if FFI.errno == ERROR_IO_PENDING
+          if errno == ERROR_IO_PENDING
             bytes = FFI::MemoryPointer.new(:ulong)
             unless GetOverlappedResult(handle, olap, bytes, true)
-              raise SystemCallError, FFI.errno, "GetOverlappedResult"
+              raise SystemCallError.new("GetOverlappedResult", FFI.errno)
             end
           else
-            raise SystemCallError, FFI.errno, "ReadFile"
+            raise SystemCallError.new("ReadFile", errno)
           end
         end
 
@@ -137,7 +139,7 @@ module Win32
         )
 
         if handle == INVALID_HANDLE_VALUE
-          raise SystemCallError, FFI.errno, "CreateFileW"
+          raise SystemCallError.new("CreateFileW", FFI.errno)
         end
 
         sysinfo = SystemInfo.new
@@ -152,7 +154,7 @@ module Win32
           base_address = VirtualAlloc(nil, size, MEM_COMMIT, PAGE_READWRITE)
 
           if base_address == 0
-            raise SystemCallError, FFI.errno, "VirtualAlloc"
+            raise SystemCallError.new("VirtualAlloc", FFI.errno)
           end
 
           # Add 1 for null as per the docs
@@ -172,7 +174,7 @@ module Win32
             if error == ERROR_IO_PENDING
               SleepEx(1, true) while !HasOverlappedIoCompleted(overlapped)
             else
-              raise SystemCallError, error, "ReadFileScatter"
+              raise SystemCallError.new("ReadFileScatter", error)
             end
           end
 
