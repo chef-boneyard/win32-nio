@@ -17,7 +17,7 @@ module Win32
     extend  Windows::Macros
 
     # The version of the win32-nio library
-    VERSION = '0.1.0'
+    VERSION = '0.1.1'
 
     # This method is similar to Ruby's IO.read method except that it uses
     # native function calls.

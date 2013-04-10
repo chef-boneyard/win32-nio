@@ -1,3 +1,7 @@
+== 0.1.1 - 10-Apr-2013
+* Updated the HANDLE type in the underlying FFI code. This affects
+  64 bit versions of Ruby.
+
 == 0.1.0 - 12-Jul-2012
 * Changed from win32-api to FFI.
 * Now requires Ruby 1.9 or later.

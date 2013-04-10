@@ -49,7 +49,7 @@
    
 = Known Bugs
   None that I know of. Please log any other bug reports on the RubyForge
-  project page at http://www.rubyforge.net/projects/win32utils
+  project page at https://github.com/djberg96/win32-nio.
 
 = Future Plans
   The pure Ruby code is really only meant for prototyping. The eventual
@@ -60,7 +60,7 @@
   Artistic 2.0
     
 = Copyright
-  (C) 2008-2012 Daniel J. Berger, All Rights Reserved
+  (C) 2008-2013 Daniel J. Berger, All Rights Reserved
     
 = Warranty
   This package is provided "as is" and without any express or
