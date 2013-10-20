@@ -5,7 +5,6 @@
 ########################################################################
 require 'test-unit'
 require 'win32/nio'
-require 'test/unit'
 include Win32
 
 class TC_Win32_NIO_Read < Test::Unit::TestCase
@@ -25,7 +24,7 @@ class TC_Win32_NIO_Read < Test::Unit::TestCase
   end
 
   test "version number is set to expected value" do
-    assert_equal('0.1.1', Win32::NIO::VERSION)
+    assert_equal('0.1.2', Win32::NIO::VERSION)
   end
 
   test "read method basic functionality" do
