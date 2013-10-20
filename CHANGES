@@ -1,6 +1,8 @@
 == 0.1.2 - 20-Oct-2013
 * Fixed the underlying data types for the OVERLAPPED FFI struct. This
   affected 64-bit versions of Ruby.
+* Updated gem:create task for Rubygems 2.x.
+* Removed unnecessary require in test suite.
 
 == 0.1.1 - 10-Apr-2013
 * Updated the HANDLE type in the underlying FFI code. This affects
