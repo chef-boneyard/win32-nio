@@ -2,7 +2,7 @@ require 'rubygems'
 
 Gem::Specification.new do |spec|
   spec.name     = 'win32-nio'
-  spec.version  = '0.1.2'
+  spec.version  = '0.1.3'
   spec.author   = 'Daniel J. Berger'
   spec.license  = 'Artistic 2.0'
   spec.email    = 'djberg96@gmail.com'
@@ -17,6 +17,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency('ffi')
   spec.add_dependency('win32-event', '>= 0.6.0')
 
+  spec.add_development_dependency('rake')
   spec.add_development_dependency('test-unit')
 
   spec.description = <<-EOF
