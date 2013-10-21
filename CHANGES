@@ -1,3 +1,7 @@
+== 0.1.3 - 21-Oct-2013
+* Fixed INVALID_HANDLE_VALUE for 64-bit versions of Ruby.
+* Added Rake as a development dependency.
+
 == 0.1.2 - 20-Oct-2013
 * Fixed the underlying data types for the OVERLAPPED FFI struct. This
   affected 64-bit versions of Ruby.
