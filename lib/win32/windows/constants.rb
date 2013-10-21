@@ -1,6 +1,11 @@
+require 'ffi'
 module Windows
   module Constants
-    INVALID_HANDLE_VALUE = 0xFFFFFFFF
+    include FFI::Library
+
+    private
+
+    INVALID_HANDLE_VALUE = FFI::Pointer.new(-1).address
 
     CREATE_NEW        = 1
     CREATE_ALWAYS     = 2
@@ -59,11 +64,11 @@ module Windows
     WAIT_ABANDONED   = 128
     WAIT_ABANDONED_0 = WAIT_ABANDONED
     WAIT_FAILED      = 0xFFFFFFFF
-    
-    STATUS_WAIT_0           =  0    
-    STATUS_ABANDONED_WAIT_0 =  128    
-    STATUS_USER_APC         =  192    
-    STATUS_TIMEOUT          =  258    
+
+    STATUS_WAIT_0           =  0
+    STATUS_ABANDONED_WAIT_0 =  128
+    STATUS_USER_APC         =  192
+    STATUS_TIMEOUT          =  258
     STATUS_PENDING          =  259
 
     ERROR_IO_INCOMPLETE     = 996
