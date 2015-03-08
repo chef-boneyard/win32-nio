@@ -40,6 +40,9 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
     length = NUM2INT(v_length);
   }
 
+  if (!NIL_P(v_offset))
+    olap.Offset = NUM2INT(v_offset);
+
   buffer = (char*)ruby_xmalloc(length * sizeof(char));
 
   if (!ReadFile(h, buffer, length, &bytes_read, &olap)){
