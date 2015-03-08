@@ -5,14 +5,31 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   OVERLAPPED olap;
   HANDLE h;
   DWORD bytes_read;
+  BOOL b;
   LARGE_INTEGER size;
-  VALUE v_file, v_length, v_offset;
+  VALUE v_file, v_length, v_offset, v_options, v_event;
   size_t length;
+  int flags;
   char* buffer = NULL;
 
   memset(&olap, 0, sizeof(olap));
 
-  rb_scan_args(argc, argv, "12", &v_file, &v_length, &v_offset);
+  rb_scan_args(argc, argv, "13", &v_file, &v_length, &v_offset, &v_options);
+
+  flags = FILE_FLAG_SEQUENTIAL_SCAN;
+
+  if (!NIL_P(v_options)){
+    Check_Type(v_options, T_HASH);
+    v_event = rb_hash_aref(v_options, ID2SYM(rb_intern("event")));
+
+    if (!NIL_P(v_event)){
+      flags |= FILE_FLAG_OVERLAPPED;
+      olap.hEvent = (HANDLE)NUM2OFFT(rb_funcall(v_event, rb_intern("handle"), 0, 0));
+    }
+  }
+
+  if (!NIL_P(v_offset))
+    olap.Offset = NUM2INT(v_offset);
 
   h = CreateFileA(
     RSTRING_PTR(v_file),
@@ -20,7 +37,7 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
     FILE_SHARE_READ,
     NULL,
     OPEN_EXISTING,
-    FILE_FLAG_SEQUENTIAL_SCAN,
+    flags,
     NULL
   );
 
@@ -40,15 +57,25 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
     length = NUM2INT(v_length);
   }
 
-  if (!NIL_P(v_offset))
-    olap.Offset = NUM2INT(v_offset);
-
   buffer = (char*)ruby_xmalloc(length * sizeof(char));
 
-  if (!ReadFile(h, buffer, length, &bytes_read, &olap)){
-    ruby_xfree(buffer);
-    CloseHandle(h);
-    rb_sys_fail("ReadFile");
+  b = ReadFile(h, buffer, length, &bytes_read, &olap);
+
+  if (!b){
+    if(GetLastError() == ERROR_IO_PENDING){
+      DWORD bytes;
+      SleepEx(1, TRUE); // Put in alertable wait state
+      if (!GetOverlappedResult(h, &olap, &bytes, TRUE)){
+        ruby_xfree(buffer);
+        CloseHandle(h);
+        rb_sys_fail("GetOverlappedResult");
+      }
+    }
+    else{
+      ruby_xfree(buffer);
+      CloseHandle(h);
+      rb_sys_fail("ReadFile");
+    }
   }
 
   CloseHandle(h);
