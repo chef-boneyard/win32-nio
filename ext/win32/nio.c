@@ -7,7 +7,8 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   DWORD bytes_read;
   BOOL b;
   LARGE_INTEGER size;
-  VALUE v_file, v_length, v_offset, v_options, v_event;
+  VALUE v_file, v_length, v_offset, v_options;
+  VALUE v_event, v_mode, v_encoding;
   size_t length;
   int flags;
   char* buffer = NULL;
@@ -18,9 +19,13 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
 
   flags = FILE_FLAG_SEQUENTIAL_SCAN;
 
+  // Possible options are :event, :mode and :encoding
   if (!NIL_P(v_options)){
     Check_Type(v_options, T_HASH);
+
     v_event = rb_hash_aref(v_options, ID2SYM(rb_intern("event")));
+    v_encoding = rb_hash_aref(v_options, ID2SYM(rb_intern("encoding")));
+    v_mode = rb_hash_aref(v_options, ID2SYM(rb_intern("mode")));
 
     if (!NIL_P(v_event)){
       flags |= FILE_FLAG_OVERLAPPED;
@@ -42,13 +47,14 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   );
 
   if (h == INVALID_HANDLE_VALUE)
-    rb_sys_fail("CreateFile");
+    rb_raise(rb_eSystemCallError, "CreateFile", GetLastError());
 
   // If no length is specified, read the entire file
   if (NIL_P(v_length)){
     if (!GetFileSizeEx(h, &size)){
+      int error = GetLastError();
       CloseHandle(h);
-      rb_sys_fail("GetFileSizeEx");
+      rb_raise(rb_eSystemCallError, "GetFileSizeEx", error);
     }
 
     length = (size_t)size.QuadPart;
@@ -62,19 +68,20 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   b = ReadFile(h, buffer, length, &bytes_read, &olap);
 
   if (!b){
-    if(GetLastError() == ERROR_IO_PENDING){
+    int error = GetLastError();
+    if(error == ERROR_IO_PENDING){
       DWORD bytes;
       SleepEx(1, TRUE); // Put in alertable wait state
       if (!GetOverlappedResult(h, &olap, &bytes, TRUE)){
         ruby_xfree(buffer);
         CloseHandle(h);
-        rb_sys_fail("GetOverlappedResult");
+        rb_raise(rb_eSystemCallError, "GetOverlappedResult", error);
       }
     }
     else{
       ruby_xfree(buffer);
       CloseHandle(h);
-      rb_sys_fail("ReadFile");
+      rb_raise(rb_eSystemCallError, "ReadFile", error);
     }
   }
 
@@ -89,6 +96,9 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   SYSTEM_INFO info;
   LARGE_INTEGER file_size;
   size_t length, size, page_num, page_size;
+  VALUE v_file, v_sep;
+
+  rb_scan_args(argc, argv, "11", &v_file, &v_sep);
 
   h = CreateFileA(
     RSTRING_PTR(v_file),
