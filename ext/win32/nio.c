@@ -7,6 +7,7 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   DWORD bytes_read;
   LARGE_INTEGER size;
   VALUE v_file, v_length, v_offset;
+  size_t length;
   char* buffer = NULL;
 
   memset(&olap, 0, sizeof(olap));
@@ -26,22 +27,31 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   if (h == INVALID_HANDLE_VALUE)
     rb_sys_fail("CreateFile");
 
-  if (!GetFileSizeEx(h, &size)){
-    CloseHandle(h);
-    rb_sys_fail("GetFileSizeEx");
+  // If no length is specified, read the entire file
+  if (NIL_P(v_length)){
+    if (!GetFileSizeEx(h, &size)){
+      CloseHandle(h);
+      rb_sys_fail("GetFileSizeEx");
+    }
+
+    length = (size_t)size.QuadPart;
+  }
+  else{
+    length = NUM2INT(v_length);
   }
 
-  buffer = (char*)ruby_xmalloc((size_t)size.QuadPart * sizeof(char));
+  buffer = (char*)ruby_xmalloc(length * sizeof(char));
 
-  if (!ReadFile(h, buffer, (size_t)size.QuadPart, &bytes_read, &olap)){
+  if (!ReadFile(h, buffer, length, &bytes_read, &olap)){
     ruby_xfree(buffer);
     CloseHandle(h);
     rb_sys_fail("ReadFile");
   }
 
   CloseHandle(h);
+  buffer[length] = 0;
 
-  return rb_str_new(buffer, (size_t)size.QuadPart);
+  return rb_str_new(buffer, length);
 }
 
 void Init_nio(){
