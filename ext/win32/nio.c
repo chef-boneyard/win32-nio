@@ -84,9 +84,46 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   return rb_str_new(buffer, length);
 }
 
+static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
+  HANDLE h;
+  SYSTEM_INFO info;
+  LARGE_INTEGER file_size;
+  size_t length, size, page_num, page_size;
+
+  h = CreateFileA(
+    RSTRING_PTR(v_file),
+    GENERIC_READ,
+    FILE_SHARE_READ,
+    NULL,
+    OPEN_EXISTING,
+    FILE_FLAG_OVERLAPPED | FILE_FLAG_NO_BUFFERING,
+    NULL
+  );
+
+  if (h == INVALID_HANDLE_VALUE)
+    rb_sys_fail("CreateFile");
+
+  GetSystemInfo(&info);
+
+  if (!GetFileSizeEx(h, &file_size)){
+    CloseHandle(h);
+    rb_sys_fail("GetFileSizeEx");
+  }
+
+  length = (size_t)file_size.QuadPart;
+
+  page_size = info.dwPageSize;
+  page_num = length / page_size;
+
+  CloseHandle(h);
+
+  return self;
+}
+
 void Init_nio(){
   VALUE mWin32 = rb_define_module("Win32");
   VALUE cNio = rb_define_class_under(mWin32, "NIO", rb_cObject);
 
   rb_define_singleton_method(cNio, "read", rb_nio_read, -1);
+  rb_define_singleton_method(cNio, "readlines", rb_nio_readlines, -1);
 }
