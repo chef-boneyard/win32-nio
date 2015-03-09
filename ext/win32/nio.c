@@ -8,7 +8,7 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   BOOL b;
   LARGE_INTEGER size;
   VALUE v_file, v_length, v_offset, v_options;
-  VALUE v_event, v_mode, v_encoding;
+  VALUE v_event, v_mode, v_encoding, v_result;
   size_t length;
   int flags;
   char* buffer = NULL;
@@ -86,9 +86,16 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   }
 
   CloseHandle(h);
+
   buffer[length] = 0;
 
-  return rb_str_new(buffer, length);
+  v_result = rb_str_new(buffer, length);
+
+  // Convert CRLF to LF if text mode
+  if (!NIL_P(v_mode) && strstr(RSTRING_PTR(v_mode), "t"))
+    rb_funcall(v_result, rb_intern("gsub!"), 2, rb_str_new2("\r\n"), rb_gv_get("$/"));
+
+  return v_result;
 }
 
 static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
