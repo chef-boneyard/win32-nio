@@ -6,7 +6,6 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   HANDLE h;
   DWORD bytes_read;
   BOOL b;
-  LARGE_INTEGER size;
   VALUE v_file, v_length, v_offset, v_options;
   VALUE v_event, v_mode, v_encoding, v_result;
   size_t length;
@@ -56,13 +55,14 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
 
   // If no length is specified, read the entire file
   if (NIL_P(v_length)){
-    if (!GetFileSizeEx(h, &size)){
+    LARGE_INTEGER lsize;
+    if (!GetFileSizeEx(h, &lsize)){
       error = GetLastError();
       CloseHandle(h);
       rb_raise(rb_eSystemCallError, "GetFileSizeEx", error);
     }
 
-    length = (size_t)size.QuadPart;
+    length = (size_t)lsize.QuadPart;
   }
   else{
     length = NUM2INT(v_length);
