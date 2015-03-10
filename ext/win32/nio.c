@@ -113,6 +113,9 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   if (!NIL_P(v_mode) && strstr(RSTRING_PTR(v_mode), "t"))
     rb_funcall(v_result, rb_intern("gsub!"), 2, rb_str_new2("\r\n"), rb_gv_get("$/"));
 
+  if (!NIL_P(v_encoding))
+    rb_funcall(v_result, rb_intern("encode!"), 1, v_encoding);
+
   return v_result;
 }
 
