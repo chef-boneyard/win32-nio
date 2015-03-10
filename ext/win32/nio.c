@@ -14,6 +14,11 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
 
   memset(&olap, 0, sizeof(olap));
 
+  // Paranoid initialization
+  v_length = Qnil;
+  v_offset = Qnil;
+  v_options = Qnil;
+
   rb_scan_args(argc, argv, "13", &v_file, &v_length, &v_offset, &v_options);
 
   if (rb_respond_to(v_file, rb_intern("to_path")))
@@ -35,6 +40,11 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
       flags |= FILE_FLAG_OVERLAPPED;
       olap.hEvent = (HANDLE)NUM2OFFT(rb_funcall(v_event, rb_intern("handle"), 0, 0));
     }
+  }
+  else{
+    v_event = Qnil;
+    v_encoding = Qnil;
+    v_mode = Qnil;
   }
 
   if (!NIL_P(v_offset))
@@ -97,10 +107,11 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   CloseHandle(h);
 
   v_result = rb_str_new(buffer, length);
+  ruby_xfree(buffer);
 
   // Convert CRLF to LF if text mode
-  //if (!NIL_P(v_mode) && strstr(RSTRING_PTR(v_mode), "t"))
-  //  rb_funcall(v_result, rb_intern("gsub!"), 2, rb_str_new2("\r\n"), rb_gv_get("$/"));
+  if (!NIL_P(v_mode) && strstr(RSTRING_PTR(v_mode), "t"))
+    rb_funcall(v_result, rb_intern("gsub!"), 2, rb_str_new2("\r\n"), rb_gv_get("$/"));
 
   return v_result;
 }
