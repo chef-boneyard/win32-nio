@@ -17,6 +17,9 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
 
   rb_scan_args(argc, argv, "13", &v_file, &v_length, &v_offset, &v_options);
 
+  if (rb_respond_to(v_file, rb_intern("to_path")))
+    v_file = rb_funcall(v_file, rb_intern("to_path"), 0, NULL);
+
   SafeStringValue(v_file);
 
   flags = FILE_FLAG_SEQUENTIAL_SCAN;
