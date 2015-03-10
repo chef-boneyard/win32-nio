@@ -10,12 +10,14 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   VALUE v_file, v_length, v_offset, v_options;
   VALUE v_event, v_mode, v_encoding, v_result;
   size_t length;
-  int flags;
+  int flags, error;
   char* buffer = NULL;
 
   memset(&olap, 0, sizeof(olap));
 
   rb_scan_args(argc, argv, "13", &v_file, &v_length, &v_offset, &v_options);
+
+  SafeStringValue(v_file);
 
   flags = FILE_FLAG_SEQUENTIAL_SCAN;
 
@@ -52,7 +54,7 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   // If no length is specified, read the entire file
   if (NIL_P(v_length)){
     if (!GetFileSizeEx(h, &size)){
-      int error = GetLastError();
+      error = GetLastError();
       CloseHandle(h);
       rb_raise(rb_eSystemCallError, "GetFileSizeEx", error);
     }
@@ -67,11 +69,15 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
 
   b = ReadFile(h, buffer, length, &bytes_read, &olap);
 
+  error = GetLastError();
+
+  // Put in alertable wait state if overlapped IO
+  if (flags & FILE_FLAG_OVERLAPPED)
+    SleepEx(1, TRUE);
+
   if (!b){
-    int error = GetLastError();
     if(error == ERROR_IO_PENDING){
       DWORD bytes;
-      SleepEx(1, TRUE); // Put in alertable wait state
       if (!GetOverlappedResult(h, &olap, &bytes, TRUE)){
         ruby_xfree(buffer);
         CloseHandle(h);
@@ -87,13 +93,11 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
 
   CloseHandle(h);
 
-  buffer[length] = 0;
-
   v_result = rb_str_new(buffer, length);
 
   // Convert CRLF to LF if text mode
-  if (!NIL_P(v_mode) && strstr(RSTRING_PTR(v_mode), "t"))
-    rb_funcall(v_result, rb_intern("gsub!"), 2, rb_str_new2("\r\n"), rb_gv_get("$/"));
+  //if (!NIL_P(v_mode) && strstr(RSTRING_PTR(v_mode), "t"))
+  //  rb_funcall(v_result, rb_intern("gsub!"), 2, rb_str_new2("\r\n"), rb_gv_get("$/"));
 
   return v_result;
 }
