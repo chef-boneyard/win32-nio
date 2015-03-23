@@ -177,8 +177,11 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   HANDLE h;
   SYSTEM_INFO info;
   LARGE_INTEGER file_size;
-  size_t length, size, page_num, page_size;
-  VALUE v_file, v_sep;
+  size_t length, page_size;
+  double page_num, size;
+  void* base_address;
+  int error;
+  VALUE v_file, v_sep, v_result;
 
   rb_scan_args(argc, argv, "11", &v_file, &v_sep);
 
@@ -193,23 +196,68 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   );
 
   if (h == INVALID_HANDLE_VALUE)
-    rb_sys_fail("CreateFile");
+    rb_raise(rb_eSystemCallError, "CreateFile", GetLastError());
 
   GetSystemInfo(&info);
 
   if (!GetFileSizeEx(h, &file_size)){
+    error = GetLastError();
     CloseHandle(h);
-    rb_sys_fail("GetFileSizeEx");
+    rb_raise(rb_eSystemCallError, "GetFileSizeEx", error);
   }
 
   length = (size_t)file_size.QuadPart;
 
   page_size = info.dwPageSize;
-  page_num = length / page_size;
+  page_num = (length / page_size) + 0.5; // Force round-up
+
+  size = page_num * page_size;
+
+  base_address = VirtualAlloc(NULL, (size_t)size, MEM_COMMIT, PAGE_READWRITE);
+
+  if (!base_address){
+    error = GetLastError();
+    CloseHandle(h);
+    rb_raise(rb_eSystemCallError, "VirtualAlloc", error);
+  }
+  else{
+    int i;
+    OVERLAPPED olap;
+    BOOL rv;
+    FILE_SEGMENT_ELEMENT* fse = (FILE_SEGMENT_ELEMENT*)malloc(sizeof(FILE_SEGMENT_ELEMENT) * ((size_t)page_num + 1));
+
+    memset(fse, 0, sizeof(FILE_SEGMENT_ELEMENT) * ((size_t)page_num + 1));
+    v_result = Qnil;
+
+    for (i = 0; i < page_num + 1; i++){
+      //fse = sizeof(FILE_SEGMENT_ELEMENT) * i;
+      //fse.Alignment = base_address + page_size * i;
+    }
+
+    rv = ReadFileScatter(h, fse, (DWORD)size, NULL, &olap);
+
+    if (!rv){
+      error = GetLastError();
+
+      if (error == ERROR_IO_PENDING){
+        while (!HasOverlappedIoCompleted(&olap))
+          SleepEx(1, TRUE);
+      }
+      else{
+        VirtualFree(base_address, 0, MEM_RELEASE);
+        CloseHandle(h);
+        rb_raise(rb_eSystemCallError, "ReadFileScatter", error);
+      }
+    }
+
+    //v_result = rb_str_new2(); // What goes here?
+
+    VirtualFree(base_address, 0, MEM_RELEASE);
+  }
 
   CloseHandle(h);
 
-  return self;
+  return v_result;
 }
 
 void Init_nio(){
