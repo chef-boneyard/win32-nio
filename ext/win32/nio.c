@@ -2,6 +2,11 @@
 #include <ruby/encoding.h>
 #include <windows.h>
 
+void CALLBACK read_complete(DWORD dwErrorCode, DWORD dwBytes, LPOVERLAPPED olap){
+  VALUE p = rb_block_proc();
+  rb_funcall(p, rb_intern("call"), 0);
+}
+
 static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   OVERLAPPED olap;
   HANDLE h;
@@ -101,7 +106,13 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
 
   buffer = (char*)ruby_xmalloc(length * sizeof(char));
 
-  b = ReadFile(h, buffer, length, &bytes_read, &olap);
+  if (rb_block_given_p()){
+    flags |= FILE_FLAG_OVERLAPPED;
+    b = ReadFileEx(h, buffer, length, &olap, read_complete);
+  }
+  else{
+    b = ReadFile(h, buffer, length, &bytes_read, &olap);
+  }
 
   error = GetLastError();
 
