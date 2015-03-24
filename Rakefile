@@ -1,8 +1,22 @@
 require 'rake'
 require 'rake/clean'
 require 'rake/testtask'
+include RbConfig
 
-CLEAN.include("**/*.gem", "**/*.txt")
+CLEAN.include(
+  '**/*.gem',               # Gem files
+  '**/*.rbc',               # Rubinius
+  '**/*.o',                 # C object file
+  '**/*.log',               # Ruby extension build log
+  '**/Makefile',            # C Makefile
+  '**/*.def',               # Definition files
+  '**/*.exp',
+  '**/*.lib',
+  '**/*.pdb',
+  '**/*.obj',
+  '**/*.stackdump',         # Junk that can happen on Windows
+  "**/*.#{CONFIG['DLEXT']}" # C shared object
+)
 
 namespace 'gem' do
   desc 'Create the win32-nio gem'
