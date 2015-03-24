@@ -230,8 +230,8 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
     v_result = Qnil;
 
     for (i = 0; i < page_num + 1; i++){
-      //fse = sizeof(FILE_SEGMENT_ELEMENT) * i;
-      //fse.Alignment = base_address + page_size * i;
+      fse[i].Alignment = (ULONGLONG)base_address + (page_size * i);
+      fse += sizeof(FILE_SEGMENT_ELEMENT);
     }
 
     rv = ReadFileScatter(h, fse, (DWORD)size, NULL, &olap);
@@ -244,13 +244,13 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
           SleepEx(1, TRUE);
       }
       else{
-        VirtualFree(base_address, 0, MEM_RELEASE);
+        VirtualFree(&base_address, 0, MEM_RELEASE);
         CloseHandle(h);
         rb_raise(rb_eSystemCallError, "ReadFileScatter", error);
       }
     }
 
-    //v_result = rb_str_new2(); // What goes here?
+    v_result = rb_str_new2(fse[0].Buffer);
 
     VirtualFree(base_address, 0, MEM_RELEASE);
   }
