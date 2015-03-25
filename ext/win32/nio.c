@@ -1,6 +1,7 @@
 #include <ruby.h>
 #include <ruby/encoding.h>
 #include <windows.h>
+#include <math.h>
 
 void CALLBACK read_complete(DWORD dwErrorCode, DWORD dwBytes, LPOVERLAPPED olap){
   VALUE p = rb_block_proc();
@@ -178,9 +179,9 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   SYSTEM_INFO info;
   LARGE_INTEGER file_size;
   size_t length, page_size;
-  double page_num, size;
+  double size;
   void* base_address;
-  int error;
+  int error, page_num;
   VALUE v_file, v_sep, v_result;
 
   rb_scan_args(argc, argv, "11", &v_file, &v_sep);
@@ -209,7 +210,8 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   length = (size_t)file_size.QuadPart;
 
   page_size = info.dwPageSize;
-  page_num = (length / page_size) + 0.5; // Force round-up
+
+  page_num = (int)ceil((double)length / page_size);
 
   size = page_num * page_size;
 
@@ -229,7 +231,7 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
     memset(fse, 0, sizeof(FILE_SEGMENT_ELEMENT) * ((size_t)page_num + 1));
     v_result = Qnil;
 
-    for (i = 0; i < page_num + 1; i++){
+    for (i = 0; i < page_num; i++){
       fse[i].Alignment = (ULONGLONG)base_address + (page_size * i);
       fse += sizeof(FILE_SEGMENT_ELEMENT);
     }
