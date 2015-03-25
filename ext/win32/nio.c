@@ -226,9 +226,10 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
     int i;
     OVERLAPPED olap;
     BOOL rv;
-    FILE_SEGMENT_ELEMENT* fse = (FILE_SEGMENT_ELEMENT*)malloc(sizeof(FILE_SEGMENT_ELEMENT) * ((size_t)page_num + 1));
+    FILE_SEGMENT_ELEMENT* fse;
 
-    memset(fse, 0, sizeof(FILE_SEGMENT_ELEMENT) * ((size_t)page_num + 1));
+    fse = (FILE_SEGMENT_ELEMENT*)malloc(sizeof(FILE_SEGMENT_ELEMENT) * (page_num + 1));
+    memset(fse, 0, sizeof(FILE_SEGMENT_ELEMENT) * (page_num + 1));
     v_result = Qnil;
 
     for (i = 0; i < page_num; i++){
