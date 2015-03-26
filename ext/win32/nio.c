@@ -186,6 +186,13 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
 
   rb_scan_args(argc, argv, "11", &v_file, &v_sep);
 
+  SafeStringValue(v_file);
+
+  if (NIL_P(v_sep))
+    v_sep = rb_str_new2("\r\n");
+  else
+    SafeStringValue(v_sep);
+
   h = CreateFileA(
     RSTRING_PTR(v_file),
     GENERIC_READ,
@@ -199,8 +206,6 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   if (h == INVALID_HANDLE_VALUE)
     rb_raise(rb_eSystemCallError, "CreateFile", GetLastError());
 
-  GetSystemInfo(&info);
-
   if (!GetFileSizeEx(h, &file_size)){
     error = GetLastError();
     CloseHandle(h);
@@ -209,6 +214,7 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
 
   length = (size_t)file_size.QuadPart;
 
+  GetSystemInfo(&info);
   page_size = info.dwPageSize;
 
   page_num = (int)ceil((double)length / page_size);
