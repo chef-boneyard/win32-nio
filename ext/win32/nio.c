@@ -251,7 +251,7 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
           SleepEx(1, TRUE);
       }
       else{
-        VirtualFree(&base_address, 0, MEM_RELEASE);
+        VirtualFree(base_address, 0, MEM_RELEASE);
         CloseHandle(h);
         rb_raise(rb_eSystemCallError, "ReadFileScatter", error);
       }
