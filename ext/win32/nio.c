@@ -236,10 +236,8 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
     memset(fse, 0, sizeof(FILE_SEGMENT_ELEMENT) * (page_num + 1));
     v_result = Qnil;
 
-    for (i = 0; i < page_num; i++){
+    for (i = 0; i < page_num; i++)
       fse[i].Alignment = (ULONGLONG)base_address + (page_size * i);
-      fse += sizeof(FILE_SEGMENT_ELEMENT);
-    }
 
     rv = ReadFileScatter(h, fse, (DWORD)size, NULL, &olap);
 
