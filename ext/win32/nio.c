@@ -261,7 +261,7 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
       }
     }
 
-    v_result = rb_str_new2(fse[0].Buffer);
+    v_result = rb_funcall(rb_str_new2(fse[0].Buffer), rb_intern("split"), 1, v_sep);
 
     VirtualFree(base_address, 0, MEM_RELEASE);
   }
