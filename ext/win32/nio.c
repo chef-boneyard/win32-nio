@@ -228,6 +228,10 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
     BOOL rv;
     FILE_SEGMENT_ELEMENT* fse;
 
+    olap.Offset = 0;
+    olap.OffsetHigh = 0;
+    olap.hEvent = NULL;
+
     fse = (FILE_SEGMENT_ELEMENT*)malloc(sizeof(FILE_SEGMENT_ELEMENT) * (page_num + 1));
     memset(fse, 0, sizeof(FILE_SEGMENT_ELEMENT) * (page_num + 1));
     v_result = Qnil;
