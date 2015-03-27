@@ -34,6 +34,7 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   OVERLAPPED olap;
   HANDLE h;
   DWORD bytes_read;
+  LARGE_INTEGER lsize;
   BOOL b;
   VALUE v_file, v_length, v_offset, v_options;
   VALUE v_event, v_mode, v_encoding, v_result;
@@ -112,23 +113,26 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   if (h == INVALID_HANDLE_VALUE)
     rb_raise(rb_eSystemCallError, "CreateFile", GetLastError());
 
-  // If no length is specified, read the entire file
-  if (NIL_P(v_length)){
-    LARGE_INTEGER lsize;
-    if (!GetFileSizeEx(h, &lsize)){
-      error = GetLastError();
-      CloseHandle(h);
-      rb_raise(rb_eSystemCallError, "GetFileSizeEx", error);
-    }
+  // Get the file size. We may use this later to limit read length.
+  if (!GetFileSizeEx(h, &lsize)){
+    error = GetLastError();
+    CloseHandle(h);
+    rb_raise(rb_eSystemCallError, "GetFileSizeEx", error);
+  }
 
+  // If no length is specified, read the entire file
+  if (NIL_P(v_length))
     length = (size_t)lsize.QuadPart;
-  }
-  else{
+  else
     length = NUM2INT(v_length);
-  }
+
+  // Don't read past the end of the file
+  if (olap.Offset + length > (size_t)lsize.QuadPart)
+    length = (size_t)lsize.QuadPart - olap.Offset;
 
   buffer = (char*)ruby_xmalloc(length * sizeof(char));
 
+  // If a block is given then treat it as a callback
   if (rb_block_given_p()){
     flags |= FILE_FLAG_OVERLAPPED;
     b = ReadFileEx(h, buffer, length, &olap, read_complete);
