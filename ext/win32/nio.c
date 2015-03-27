@@ -174,6 +174,18 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   return v_result;
 }
 
+/*
+ * Reads the entire file specified by portname as individual lines, and
+ * returns those lines in an array. Lines are separated by +sep+.
+ *
+ * Examples:
+ *
+ *   # Standard call
+ *   Win32::NIO.readlines('file.txt') # => ['line 1', 'line 2', 'line 3', 'line 4']
+ *
+ *   # Paragraph mode
+ *   Win32::NIO.readlines('file.txt', '') # => ['line 1\r\nline 2', 'line 3\r\nline 4']
+ */
 static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   HANDLE h;
   SYSTEM_INFO info;
@@ -261,7 +273,17 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
       }
     }
 
-    v_result = rb_funcall(rb_str_new2(fse[0].Buffer), rb_intern("split"), 1, v_sep);
+    // Explicitly handle paragraph mode
+    if (rb_equal(v_sep, rb_str_new2(""))){
+      VALUE v_args[1];
+      v_args[0] = rb_str_new2("(\r\n){2,}");
+      v_sep = rb_class_new_instance(1, v_args, rb_cRegexp);
+      v_result = rb_funcall(rb_str_new2(fse[0].Buffer), rb_intern("split"), 1, v_sep);
+      rb_funcall(v_result, rb_intern("delete"), 1, rb_str_new2("\r\n"));
+    }
+    else{
+      v_result = rb_funcall(rb_str_new2(fse[0].Buffer), rb_intern("split"), 1, v_sep);
+    }
 
     VirtualFree(base_address, 0, MEM_RELEASE);
   }
