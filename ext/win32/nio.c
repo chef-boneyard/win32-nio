@@ -3,9 +3,16 @@
 #include <windows.h>
 #include <math.h>
 
+// Callback used when a block is provided to read method. It simply calls the block.
 void CALLBACK read_complete(DWORD dwErrorCode, DWORD dwBytes, LPOVERLAPPED olap){
   VALUE p = rb_block_proc();
   rb_funcall(p, rb_intern("call"), 0);
+}
+
+// Helper function to raise system errors the way I would like
+void rb_raise_syserr(const char* msg, int errnum){
+  VALUE v_sys = rb_funcall(rb_eSystemCallError, rb_intern("new"), 2, rb_str_new2(msg), INT2FIX(errnum));
+  rb_funcall(rb_mKernel, rb_intern("raise"), 1, v_sys);
 }
 
 /*
@@ -111,13 +118,13 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   );
 
   if (h == INVALID_HANDLE_VALUE)
-    rb_raise(rb_eSystemCallError, "CreateFile", GetLastError());
+    rb_raise_syserr("CreateFile", GetLastError());
 
   // Get the file size. We may use this later to limit read length.
   if (!GetFileSizeEx(h, &lsize)){
     error = GetLastError();
     CloseHandle(h);
-    rb_raise(rb_eSystemCallError, "GetFileSizeEx", error);
+    rb_raise_syserr("GetFileSizeEx", error);
   }
 
   // If no length is specified, read the entire file
@@ -153,13 +160,13 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
       if (!GetOverlappedResult(h, &olap, &bytes, TRUE)){
         ruby_xfree(buffer);
         CloseHandle(h);
-        rb_raise(rb_eSystemCallError, "GetOverlappedResult", error);
+        rb_raise_syserr("GetOverlappedResult", error);
       }
     }
     else{
       ruby_xfree(buffer);
       CloseHandle(h);
-      rb_raise(rb_eSystemCallError, "ReadFile", error);
+      rb_raise_syserr("ReadFile", error);
     }
   }
 
@@ -225,7 +232,7 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   if (!GetFileSizeEx(h, &file_size)){
     error = GetLastError();
     CloseHandle(h);
-    rb_raise(rb_eSystemCallError, "GetFileSizeEx", error);
+    rb_raise_syserr("GetFileSizeEx", error);
   }
 
   length = (size_t)file_size.QuadPart;
@@ -242,7 +249,7 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   if (!base_address){
     error = GetLastError();
     CloseHandle(h);
-    rb_raise(rb_eSystemCallError, "VirtualAlloc", error);
+    rb_raise_syserr("VirtualAlloc", error);
   }
   else{
     int i;
@@ -273,7 +280,7 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
       else{
         VirtualFree(base_address, 0, MEM_RELEASE);
         CloseHandle(h);
-        rb_raise(rb_eSystemCallError, "ReadFileScatter", error);
+        rb_raise_syserr("ReadFileScatter", error);
       }
     }
 
