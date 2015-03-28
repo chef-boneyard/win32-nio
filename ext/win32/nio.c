@@ -128,10 +128,16 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   }
 
   // If no length is specified, read the entire file
-  if (NIL_P(v_length))
+  if (NIL_P(v_length)){
     length = (size_t)lsize.QuadPart;
-  else
+  }
+  else{
     length = NUM2INT(v_length);
+    if ((int)length < 0){
+      CloseHandle(h);
+      rb_raise(rb_eArgError, "negative length %i given", length);
+    }
+  }
 
   // Don't read past the end of the file
   if (olap.Offset + length > (size_t)lsize.QuadPart)
