@@ -105,7 +105,7 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   }
 
   if (!NIL_P(v_offset))
-    olap.Offset = NUM2INT(v_offset);
+    olap.Offset = NUM2ULONG(v_offset);
 
   h = CreateFileW(
     file,
@@ -132,6 +132,7 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
     length = (size_t)lsize.QuadPart;
   }
   else{
+    Check_Type(v_length, T_FIXNUM);
     length = NUM2SIZET(v_length);
     if ((int)length < 0){
       CloseHandle(h);
