@@ -67,6 +67,15 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
 
   SafeStringValue(v_file);
 
+  if (!NIL_P(v_length)){
+    length = NUM2SIZET(v_length);
+    if ((int)length < 0)
+      rb_raise(rb_eArgError, "negative length %i given", length);
+  }
+
+  if (!NIL_P(v_offset))
+    olap.Offset = NUM2ULONG(v_offset);
+
   file_encoding = rb_enc_get(v_file);
 
   if (rb_enc_to_index(file_encoding) != rb_utf8_encindex()){
@@ -104,9 +113,6 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
     v_mode = Qnil;
   }
 
-  if (!NIL_P(v_offset))
-    olap.Offset = NUM2ULONG(v_offset);
-
   h = CreateFileW(
     file,
     GENERIC_READ,
@@ -128,16 +134,8 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   }
 
   // If no length is specified, read the entire file
-  if (NIL_P(v_length)){
+  if (NIL_P(v_length))
     length = (size_t)lsize.QuadPart;
-  }
-  else{
-    length = NUM2SIZET(v_length);
-    if ((int)length < 0){
-      CloseHandle(h);
-      rb_raise(rb_eArgError, "negative length %i given", length);
-    }
-  }
 
   // Don't read past the end of the file
   if (olap.Offset + length > (size_t)lsize.QuadPart)
