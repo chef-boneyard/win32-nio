@@ -132,7 +132,6 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
     length = (size_t)lsize.QuadPart;
   }
   else{
-    Check_Type(v_length, T_FIXNUM);
     length = NUM2SIZET(v_length);
     if ((int)length < 0){
       CloseHandle(h);
