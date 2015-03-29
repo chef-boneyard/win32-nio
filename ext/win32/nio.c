@@ -132,7 +132,7 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
     length = (size_t)lsize.QuadPart;
   }
   else{
-    length = NUM2INT(v_length);
+    length = NUM2SIZET(v_length);
     if ((int)length < 0){
       CloseHandle(h);
       rb_raise(rb_eArgError, "negative length %i given", length);
