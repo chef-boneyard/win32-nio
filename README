@@ -59,6 +59,11 @@
   NIO.readlines(large)   9.719000   0.468000  10.187000 ( 13.437217)
   
   Your results may vary.
+
+= JRuby
+  As of version 0.2.0 this code was written as a C extension, and
+  does not support JRuby. However, JRuby users can continue to use
+  the 0.1.x branch.
                          
 = Known Bugs
   None that I know of. Please log any other bug reports on the RubyForge
