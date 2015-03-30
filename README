@@ -9,58 +9,66 @@
   require 'win32/nio'
   include Win32
    
+  # Similar to Ruby
   p NIO.read('some_file.text')
-   
-  p NIO.readlines('some_file.txt')
-   
-= Proof of Concept
-  This code is ALPHA!
-  
-  This code is mostly a proof of concept to see how to implement Ruby's
-  IO functions in pure Windows functions. While it does offer a couple of
-  features over and above Ruby's IO interface, such as the ability to supply
-  an event or a block to the NIO.read method, it offers little practical
-  advantage at the moment.
-   
-  In addition, it is currently using pure Ruby (via FFI), which means
-  it isn't optimized for speed.
+  p NIO.read('some_file.text', 50)
+  p NIO.read('some_file.text', 50, 5)
 
+  p NIO.readlines('some_file.txt')
+  p NIO.readlines('some_file.txt', '')
+
+  # With events
+  event = Win32::Event.new
+
+  NIO.read('some_big_file.txt', nil, nil, event)
+  p event.signaled? # => true
+
+  # With blocks
+  NIO.read('some_big_file.txt'){ puts "Finished" }
+
+= Proof of Concept 
+  This code was originally written to see if using pure Windows functions
+  to implement MRI methods would offer any practical advantage. The answer
+  is a definite maybe.
+
+  Functionally, these library does offer something the MRI methods do not,
+  which is the ability to provide a block or event object that is called
+  when a read is finished.
+
+  In terms of speed, I've found the NIO.read method to be almost twice as
+  fast as Ruby 2.2, while the NIO.readlines method was about the same speed.
+  In most cases the NIO.readlines method offers no practical advantage, but
+  see the documentation for details.
+   
 = Benchmarks
 
-  Using my HP Windows XP Pro laptop, with a 1.66 core duo Pentium T5500 and
-  2gb of RAM, I saw these results, which were typical in repeated runs:
+  Using my current laptop running Windows 7 I saw these results, which were
+  typical in repeated runs:
+
+  IO.read(small)         0.000000   0.016000   0.016000 (  0.020342)
+  NIO.read(small)        0.000000   0.000000   0.000000 (  0.008140)
+  IO.read(medium)        0.187000   0.047000   0.234000 (  0.230579)
+  NIO.read(medium)       0.015000   0.093000   0.108000 (  0.122542)
+  IO.read(large)         1.654000   0.593000   2.247000 (  2.355478)
+  NIO.read(large)        0.343000   0.765000   1.108000 (  1.222567)
+  IO.readlines(small)    0.125000   0.000000   0.125000 (  0.119982)
+  NIO.readlines(small)   0.094000   0.015000   0.109000 (  0.132461)
+  IO.readlines(medium)   1.419000   0.234000   1.653000 (  1.764216)
+  NIO.readlines(medium)  1.092000   0.109000   1.201000 (  1.537593)
+  IO.readlines(large)   12.714000   0.874000  13.588000 ( 13.798494)
+  NIO.readlines(large)   9.719000   0.468000  10.187000 ( 13.437217)
+  
+  Your results may vary.
                          
-                          user     system      total        real
-  IO.read(small)         0.016000   0.047000   0.063000 (  0.063000)
-  NIO.read(small)        0.109000   0.000000   0.109000 (  0.109000)
-  IO.read(medium)        0.422000   0.094000   0.516000 (  0.532000)
-  NIO.read(medium)       0.937000   0.062000   0.999000 (  1.047000)
-  IO.read(large)         3.282000   1.063000   4.345000 (  4.468000)
-  NIO.read(large)        8.187000   1.062000   9.249000 (  9.454000)
-  IO.readlines(small)    0.156000   0.063000   0.219000 (  0.234000)
-  NIO.readlines(small)   0.141000   0.000000   0.141000 (  0.797000)
-  IO.readlines(medium)   2.984000   0.250000   3.234000 (  3.625000)
-  NIO.readlines(medium)  1.172000   0.062000   1.234000 (  3.406000)
-  IO.readlines(large)    18.625000   2.281000  20.906000 ( 21.532000)
-  NIO.readlines(large)   12.406000   0.563000  12.969000 (122.643000)
-   
-  Note that, in most cases, the user and system time has decreased, but
-  the real time has increased.
-   
 = Known Bugs
   None that I know of. Please log any other bug reports on the RubyForge
   project page at https://github.com/djberg96/win32-nio.
-
-= Future Plans
-  The pure Ruby code is really only meant for prototyping. The eventual
-  plan is to convert the Ruby code to equivalent C code in order to improve
-  performance.
 
 = License
   Artistic 2.0
     
 = Copyright
-  (C) 2008-2013 Daniel J. Berger, All Rights Reserved
+  (C) 2008-2015 Daniel J. Berger, All Rights Reserved
     
 = Warranty
   This package is provided "as is" and without any express or
