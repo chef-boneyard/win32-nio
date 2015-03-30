@@ -31,7 +31,7 @@
   to implement MRI methods would offer any practical advantage. The answer
   is a definite maybe.
 
-  Functionally, these library does offer something the MRI methods do not,
+  Functionally, this library does offer something the MRI methods do not,
   which is the ability to provide a block or event object that is called
   when a read is finished.
 
