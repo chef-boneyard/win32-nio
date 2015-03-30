@@ -190,6 +190,11 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
  *   # Paragraph mode
  *   Win32::NIO.readlines('file.txt', '') # => ['line 1\r\nline 2', 'line 3\r\nline 4']
  *
+ *   # With event
+ *   event = Win32::Event.new
+ *   Win32::NIO.readlines('file.txt', nil, event)
+ *   p event.signaled? # => true
+ *
  * Superficially this method acts the same as the Ruby IO.readlines call, except that
  * it does not transform line endings. However, internally this method is using a
  * scattered read to accomplish its goal. In practice this is only relevant in
@@ -207,9 +212,9 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   void* base_address;
   int error, page_num;
   wchar_t* file;
-  VALUE v_file, v_sep, v_result;
+  VALUE v_file, v_sep, v_event, v_result;
 
-  rb_scan_args(argc, argv, "11", &v_file, &v_sep);
+  rb_scan_args(argc, argv, "12", &v_file, &v_sep, &v_event);
 
   SafeStringValue(v_file);
 
@@ -269,7 +274,11 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
 
     olap.Offset = 0;
     olap.OffsetHigh = 0;
-    olap.hEvent = NULL;
+
+    if (NIL_P(v_event))
+      olap.hEvent = NULL;
+    else
+      olap.hEvent = (HANDLE)NUM2OFFT(rb_funcall(v_event, rb_intern("handle"), 0, 0));
 
     fse = (FILE_SEGMENT_ELEMENT*)malloc(sizeof(FILE_SEGMENT_ELEMENT) * (page_num + 1));
     memset(fse, 0, sizeof(FILE_SEGMENT_ELEMENT) * (page_num + 1));
