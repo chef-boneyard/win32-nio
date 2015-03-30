@@ -209,6 +209,7 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   double size;
   void* base_address;
   int error, page_num;
+  wchar_t* file;
   VALUE v_file, v_sep, v_result;
 
   rb_scan_args(argc, argv, "11", &v_file, &v_sep);
@@ -220,8 +221,16 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   else
     SafeStringValue(v_sep);
 
-  h = CreateFileA(
-    RSTRING_PTR(v_file),
+  length = MultiByteToWideChar(CP_UTF8, 0, RSTRING_PTR(v_file), -1, NULL, 0);
+  file = (wchar_t*)ruby_xmalloc(MAX_PATH * sizeof(wchar_t));
+
+  if (!MultiByteToWideChar(CP_UTF8, 0, RSTRING_PTR(v_file), -1, file, length)){
+    ruby_xfree(file);
+    rb_raise(rb_eSystemCallError, "MultibyteToWideChar", GetLastError());
+  }
+
+  h = CreateFileW(
+    file,
     GENERIC_READ,
     FILE_SHARE_READ,
     NULL,
