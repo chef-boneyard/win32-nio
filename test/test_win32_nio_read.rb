@@ -74,7 +74,7 @@ class TC_Win32_NIO_Read < Test::Unit::TestCase
   end
 
   def self.shutdown
-    File.delete(@@file) if File.exists?(@@file)
+    File.delete(@@file) if File.exist?(@@file)
     @@file = nil
     @@text = nil
   end
