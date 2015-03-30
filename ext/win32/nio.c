@@ -189,6 +189,14 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
  *
  *   # Paragraph mode
  *   Win32::NIO.readlines('file.txt', '') # => ['line 1\r\nline 2', 'line 3\r\nline 4']
+ *
+ * Superficially this method acts the same as the Ruby IO.readlines call, except that
+ * it does not transform line endings. However, internally this method is using a
+ * scattered read to accomplish its goal. In practice this is only relevant in
+ * specific situations. Using it outside of those situations is unlikely to provide
+ * any practical benefit, and may even result in slower performance.
+ *
+ * See information on vectored IO for more details.
  */
 static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   HANDLE h;
