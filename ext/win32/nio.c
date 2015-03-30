@@ -47,9 +47,6 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   VALUE v_event, v_mode, v_encoding, v_result;
   size_t length;
   int flags, error, size;
-  rb_encoding* file_encoding;
-  rb_econv_t* ec;
-  const int replaceflags = ECONV_UNDEF_REPLACE | ECONV_INVALID_REPLACE;
   wchar_t* file = NULL;
   char* buffer = NULL;
 
@@ -75,14 +72,6 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
 
   if (!NIL_P(v_offset))
     olap.Offset = NUM2ULONG(v_offset);
-
-  file_encoding = rb_enc_get(v_file);
-
-  if (rb_enc_to_index(file_encoding) != rb_utf8_encindex()){
-    ec = rb_econv_open(rb_enc_name(file_encoding), "UTF-8", replaceflags);
-    v_file = rb_econv_str_convert(ec, v_file, ECONV_PARTIAL_INPUT);
-    rb_econv_close(ec);
-  }
 
   size = MultiByteToWideChar(CP_UTF8, 0, RSTRING_PTR(v_file), -1, NULL, 0);
   file = (wchar_t*)ruby_xmalloc(MAX_PATH * sizeof(wchar_t));
