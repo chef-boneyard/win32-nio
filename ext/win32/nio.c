@@ -67,7 +67,7 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
   if (!NIL_P(v_length)){
     length = NUM2SIZET(v_length);
     if ((int)length < 0)
-      rb_raise(rb_eArgError, "negative length %i given", length);
+      rb_raise(rb_eArgError, "negative length %i given", (int)length);
   }
 
   if (!NIL_P(v_offset))
@@ -78,7 +78,7 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
 
   if (!MultiByteToWideChar(CP_UTF8, 0, RSTRING_PTR(v_file), -1, file, size)){
     ruby_xfree(file);
-    rb_raise(rb_eSystemCallError, "MultibyteToWideChar", GetLastError());
+    rb_raise_syserr("MultibyteToWideChar", GetLastError());
   }
 
   flags = FILE_FLAG_SEQUENTIAL_SCAN;
@@ -223,12 +223,14 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   else
     SafeStringValue(v_sep);
 
+  v_result = Qnil;
+
   length = MultiByteToWideChar(CP_UTF8, 0, RSTRING_PTR(v_file), -1, NULL, 0);
   file = (wchar_t*)ruby_xmalloc(MAX_PATH * sizeof(wchar_t));
 
   if (!MultiByteToWideChar(CP_UTF8, 0, RSTRING_PTR(v_file), -1, file, length)){
     ruby_xfree(file);
-    rb_raise(rb_eSystemCallError, "MultibyteToWideChar", GetLastError());
+    rb_raise_syserr("MultibyteToWideChar", GetLastError());
   }
 
   h = CreateFileW(
@@ -242,7 +244,7 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
   );
 
   if (h == INVALID_HANDLE_VALUE)
-    rb_raise(rb_eSystemCallError, "CreateFile", GetLastError());
+    rb_raise_syserr("CreateFile", GetLastError());
 
   if (!GetFileSizeEx(h, &file_size)){
     error = GetLastError();
