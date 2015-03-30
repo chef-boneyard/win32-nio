@@ -59,20 +59,30 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
 
   rb_scan_args(argc, argv, "13", &v_file, &v_length, &v_offset, &v_options);
 
+  // Allow path-y objects.
   if (rb_respond_to(v_file, rb_intern("to_path")))
     v_file = rb_funcall(v_file, rb_intern("to_path"), 0, NULL);
 
   SafeStringValue(v_file);
 
+  // If a length is provided it cannot be negative.
   if (!NIL_P(v_length)){
     length = NUM2SIZET(v_length);
     if ((int)length < 0)
       rb_raise(rb_eArgError, "negative length %i given", (int)length);
   }
+  else{
+    length = 0; // Mostly to make gcc stfu. We'll set this later.
+  }
 
-  if (!NIL_P(v_offset))
+  // Unlike MRI, don't wait for an internal C function to fail on an invalid argument.
+  if (!NIL_P(v_offset)){
     olap.Offset = NUM2ULONG(v_offset);
+    if ((int)olap.Offset < 0)
+      rb_raise(rb_eArgError, "negative offset %i given", (int)olap.Offset);
+  }
 
+  // Gotta do this for wide character function support.
   size = MultiByteToWideChar(CP_UTF8, 0, RSTRING_PTR(v_file), -1, NULL, 0);
   file = (wchar_t*)ruby_xmalloc(MAX_PATH * sizeof(wchar_t));
 
