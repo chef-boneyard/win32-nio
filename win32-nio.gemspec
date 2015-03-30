@@ -1,20 +1,20 @@
 require 'rubygems'
 
 Gem::Specification.new do |spec|
-  spec.name     = 'win32-nio'
-  spec.version  = '0.1.3'
-  spec.author   = 'Daniel J. Berger'
-  spec.license  = 'Artistic 2.0'
-  spec.email    = 'djberg96@gmail.com'
-  spec.homepage = 'https://github.com/djberg96/win32-nio'
-  spec.summary  = 'Native IO for MS Windows'
-  spec.files    = Dir['**/*'].reject{ |f| f.include?('git') }
+  spec.name       = 'win32-nio'
+  spec.version    = '0.2.0'
+  spec.author     = 'Daniel J. Berger'
+  spec.license    = 'Artistic 2.0'
+  spec.email      = 'djberg96@gmail.com'
+  spec.homepage   = 'https://github.com/djberg96/win32-nio'
+  spec.summary    = 'Native IO for MS Windows'
+  spec.files      = Dir['**/*'].reject{ |f| f.include?('git') }
+  spec.extensions = ['ext/extconf.rb']
 
   spec.rubyforge_project = 'Win32Utils'
   spec.extra_rdoc_files  = ['README', 'CHANGES', 'MANIFEST']
   spec.required_ruby_version = '> 1.9.0'
 
-  spec.add_dependency('ffi')
   spec.add_dependency('win32-event', '>= 0.6.0')
 
   spec.add_development_dependency('rake')
