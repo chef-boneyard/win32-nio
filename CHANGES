@@ -1,5 +1,7 @@
 == 0.2.0 - ???
 * Converted to C code for performance.
+* The NIO.readlines method now accepts an optional event object as
+  an argument.
  
 == 0.1.3 - 21-Oct-2013
 * Fixed INVALID_HANDLE_VALUE for 64-bit versions of Ruby.
