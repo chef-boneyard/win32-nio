@@ -49,8 +49,8 @@ namespace 'gem' do
 end
 
 desc 'Run the benchmark suite'
-task :bench do
-  sh "ruby -Ilib benchmarks/win32_nio_benchmarks.rb"
+task :bench => [:build] do
+  sh "ruby -Iext benchmarks/win32_nio_benchmarks.rb"
 end
 
 namespace :test do
