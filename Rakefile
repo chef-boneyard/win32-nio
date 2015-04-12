@@ -5,6 +5,7 @@ include RbConfig
 
 CLEAN.include(
   '**/*.gem',               # Gem files
+  '**/*.txt',               # Benchmark files
   '**/*.rbc',               # Rubinius
   '**/*.o',                 # C object file
   '**/*.log',               # Ruby extension build log
