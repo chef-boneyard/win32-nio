@@ -30,10 +30,10 @@ void rb_raise_syserr(const char* msg, int errnum){
 * # Read 50 bytes starting at offset 10
 * Win32::NIO.read(file, 50, 10)
 *
-* Note that the + options + that may be passed to this method are limited
-* to :encoding, : mode and : event because we're no longer using the open
-* function internally.In the case of:mode the only thing that is checked
-* for is the presence of the 'b' (binary)mode.
+* Note that the +options+ that may be passed to this method are limited
+* to :encoding, :mode and :event because we're no longer using the open
+* function internally. In the case of :mode the only thing that is checked
+* for is the presence of the 'b' (binary) mode.
 *
 * The :event option, if present, must be a Win32::Event object.
 */
