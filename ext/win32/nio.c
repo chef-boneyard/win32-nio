@@ -16,8 +16,12 @@ void rb_raise_syserr(const char* msg, int errnum){
 }
 
 /*
+* NIO.read(file, length=nil, offset=0, options=nil){ # optional block }
+*
 * This method is similar to Ruby's IO.read method except that it uses
-* native function calls.
+* native function calls. It also optionally accepts a Win32::Event object,
+* signalling it upon completion. If provided it calls a block upon completion
+* of the read.
 *
 * Examples:
 *
@@ -189,8 +193,12 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
 }
 
 /*
+ * NIO.readlines(file, sep="\r\n", event=nil)
+ *
  * Reads the entire file specified by portname as individual lines, and
- * returns those lines in an array. Lines are separated by +sep+.
+ * returns those lines in an array. Lines are separated by +sep+. The +event+
+ * argument must be a Win32::Event if present, and it is signalled upon
+ * completion.
  *
  * Examples:
  *
