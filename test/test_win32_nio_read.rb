@@ -34,8 +34,6 @@ class TC_Win32_NIO_Read < Test::Unit::TestCase
 
   test "read method accepts a file name and returns a string of the expected size" do
     assert_kind_of(String, NIO.read(@@file))
-    p @size
-    p NIO.read(@@file).size
     assert_true(NIO.read(@@file).size == @size)
   end
 
