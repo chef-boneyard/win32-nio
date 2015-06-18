@@ -4,10 +4,7 @@
 * README
 * win32-nio.gemspec
 * benchmarks/win32_nio_benchmarks.rb
-* lib/win32/nio.rb
-* lib/windows/constants.rb
-* lib/windows/functions.rb
-* lib/windows/macros.rb
-* lib/windows/structs.rb
+* ext/extconf.rb
+* ext/win32/nio.c
 * test/test_win32_nio_read.rb
 * test/test_win32_nio_readlines.rb
