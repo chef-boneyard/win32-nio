@@ -107,7 +107,7 @@ static VALUE rb_nio_read(int argc, VALUE* argv, VALUE self){
 
     if (!NIL_P(v_event)){
       flags |= FILE_FLAG_OVERLAPPED;
-      olap.hEvent = (HANDLE)NUM2OFFT(rb_funcall(v_event, rb_intern("handle"), 0, 0));
+      olap.hEvent = (HANDLE)(uintptr_t)NUM2OFFT(rb_funcall(v_event, rb_intern("handle"), 0, 0));
     }
   }
   else{
@@ -298,14 +298,14 @@ static VALUE rb_nio_readlines(int argc, VALUE* argv, VALUE self){
     if (NIL_P(v_event))
       olap.hEvent = NULL;
     else
-      olap.hEvent = (HANDLE)NUM2OFFT(rb_funcall(v_event, rb_intern("handle"), 0, 0));
+      olap.hEvent = (HANDLE)(uintptr_t)NUM2OFFT(rb_funcall(v_event, rb_intern("handle"), 0, 0));
 
     fse = (FILE_SEGMENT_ELEMENT*)malloc(sizeof(FILE_SEGMENT_ELEMENT) * (page_num + 1));
     memset(fse, 0, sizeof(FILE_SEGMENT_ELEMENT) * (page_num + 1));
     v_result = Qnil;
 
     for (i = 0; i < page_num; i++)
-      fse[i].Alignment = (ULONGLONG)base_address + (page_size * i);
+      fse[i].Alignment = (ULONGLONG)(uintptr_t)base_address + (page_size * i);
 
     rv = ReadFileScatter(h, fse, (DWORD)size, NULL, &olap);
 
