@@ -350,6 +350,6 @@ void Init_nio(){
   rb_define_singleton_method(cNio, "read", rb_nio_read, -1);
   rb_define_singleton_method(cNio, "readlines", rb_nio_readlines, -1);
 
-  /* 0.2.1: The version of the win32-nio library */
-  rb_define_const(cNio, "VERSION", rb_str_new2("0.2.1"));
+  /* 0.2.2: The version of the win32-nio library */
+  rb_define_const(cNio, "VERSION", rb_str_new2("0.2.2"));
 }
