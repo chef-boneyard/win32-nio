@@ -1,9 +1,11 @@
+* appveyor.yml
 * CHANGES
 * MANIFEST
 * Rakefile
 * README
 * win32-nio.gemspec
 * benchmarks/win32_nio_benchmarks.rb
+* certs/djberg96_pub.pem
 * ext/extconf.rb
 * ext/win32/nio.c
 * test/test_win32_nio_read.rb
