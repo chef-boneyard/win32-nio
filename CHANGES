@@ -1,3 +1,8 @@
+== 0.2.2 - 18-Nov-2015
+* This gem is now signed.
+* Added an appveyor.yml file for the MS continuous integration service.
+* Some Rakefile updates.
+
 == 0.2.1 - 21-Jun-2015
 * Fixed some build warnings on mingw32.
 
